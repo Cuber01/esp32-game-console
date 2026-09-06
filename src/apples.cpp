@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include "esp_random.h"
 #include "game.h"
 #include "map.h"
 #include "apples.h"
@@ -12,10 +12,10 @@ int appleMultiplier = 1;
 
 point_t calculateApplePos(void)
 {
-    int apple_x = rand() % MAP_WIDTH + 0;
-    int apple_y = rand() % MAP_HEIGHT + 0;
+    uint32_t apple_x = esp_random() % MAP_WIDTH + 0;
+    uint32_t apple_y = esp_random() % MAP_HEIGHT + 0;
 
-    return (point_t){ .x = apple_x, .y = apple_y };
+    return (point_t){ .x = (int)apple_x, .y = (int)apple_y };
 }
 
 void applesClear()

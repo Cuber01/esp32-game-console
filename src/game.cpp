@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <stdbool.h>
-
 #include "game.h"
 
 #include <esp32-hal.h>
@@ -104,7 +99,6 @@ void gameLoop()
 void gameInit(void)
 {
     controllerInit();
-    srand(time(NULL));
     applesClear();
     snakeInit();
     appleAdd(calculateApplePos());
