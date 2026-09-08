@@ -2,9 +2,9 @@
 #ifndef ESP32_GAME_CONSOLE_GRAPHICS_H
 #define ESP32_GAME_CONSOLE_GRAPHICS_H
 
-#define TFT_CS        5
-#define TFT_RST       16
-#define TFT_DC        17
+#define SCREEN_CS        5
+#define SCREEN_RST       16
+#define SCREEN_DC        17
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 280
