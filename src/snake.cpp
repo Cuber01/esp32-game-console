@@ -1,26 +1,27 @@
-#include <stdio.h>
+#include <cstdio>
 
 #include "game.h"
 #include "snake.h"
 #include "cyclic_buffer.h"
 #include "map.h"
+#include "controller.h"
 
 int snake_vel_x = 1;
 int snake_vel_y = 0;
 
 bool snakeCollision( point_t value, bool head_omit);
 
-void snakeClear(void)
+void snakeClear()
 {
     snakeInit();
 }
 
-point_t SnakeGet(void)
+point_t SnakeGet()
 {
     return cbGetHead();
 }
 
-void placeSnakeOnMap(void)
+void placeSnakeOnMap()
 {
     point_t point;
     int rv;
@@ -51,36 +52,36 @@ void snakeInit(void)
     cbAdd((point_t){.x = 6, .y = 3});
 }
 
-void snakeMove(direction_t direction, bool grow )
+void snakeMove(InputKeys direction, bool grow )
 {
-    static direction_t current_direction = NONE;
+    static InputKeys current_direction = INPUT_NONE;
 
     point_t current_postition = cbGetHead();
     point_t next_postition = current_postition;
 
-    if( direction == NONE ){
+    if( direction == INPUT_NONE ){
         direction = current_direction;
     }
 
     switch (direction)
     {
-    case LEFT:
+    case INPUT_LEFT:
         next_postition.x -= 1;        
         break;
-    case RIGHT:
+    case INPUT_RIGHT:
         next_postition.x += 1;
         break;
-    case UP:
+    case INPUT_FORWARD:
         next_postition.y -= 1;
         break;
-    case DOWN:
+    case INPUT_BACKWARD:
         next_postition.y += 1;    
         break;
-    case NONE:    
+    default:
         break;
     };
 
-    if( current_direction != NONE ){
+    if( current_direction != INPUT_NONE ){
         if (snakeCollision( next_postition, false )) {
               gameRunning = false;
         }    

@@ -34,7 +34,7 @@ void draw( char Map[MAP_WIDTH][MAP_HEIGHT], point_t apples[MAX_APPLES] )
 }
 
 
-void update(char input, point_t apples[MAX_APPLES])
+void update(InputKeys input, point_t apples[MAX_APPLES])
 {
     point_t snake_postition = cbGetHead();
     bool grow = false;
@@ -50,53 +50,18 @@ void update(char input, point_t apples[MAX_APPLES])
         } 
     } 
 
-    //handleInput(input, grow);
+    snakeMove(input, grow);
 }
-
-char getInput(void)
-{
-    char key = controllerGetInput();
-
-    if( key != NO_KEY ) {
-            return key;
-    }
-
-    return NO_KEY;
-}
-
-void handleInput(char input, bool grow) 
-{
-    if (input == 'a')
-    {
-        snakeMove( LEFT, grow );
-
-    } else if (input == 'd')
-    {
-        snakeMove( RIGHT, grow );
-
-    } else if (input == 'w')
-    {
-        snakeMove( UP, grow );
-
-    } else if (input == 's')
-    {
-        snakeMove( DOWN, grow );
-    } else
-    {
-        snakeMove( NONE, grow );
-    }
-}
-
 
 void gameLoop()
 {
     mapClear();
-    update(getInput(), apples);
+    update(controllerGetInput(), apples);
     draw(Map, apples);
     delay(frameDelay); // TODO is this correct delay?
 }
 
-void gameInit(void)
+void gameInit()
 {
     controllerInit();
     applesClear();

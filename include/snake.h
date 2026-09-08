@@ -5,6 +5,8 @@
 #include "map.h"
 #include <cstdint>
 
+#include "controller.h"
+
 #define MAX_SNAKES (MAP_WIDTH * MAP_HEIGHT)
 
 extern point_t snakeParts[MAX_SNAKES];
@@ -24,18 +26,9 @@ typedef struct
     point_t snakeParts[MAX_SNAKES];
 } snake_t;
 
-typedef enum
-{
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN,
-    NONE,
-} direction_t;
-
 void snakeInit(void);
 void snakeClear(void);
-void snakeMove(direction_t direction, bool grow);
+void snakeMove(InputKeys direction, bool grow);
 void placeSnakeOnMap(void);
 
 point_t SnakeGet(void);
