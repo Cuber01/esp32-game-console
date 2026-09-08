@@ -2,7 +2,7 @@
 #define __MAP_H
 
 #include "graphics.h"
-#include <stdint.h>
+#include <cstdint>
 
 #define GROUND_SYMBOL ' '
 #define APPLE_SYMBOL '@'
@@ -13,8 +13,8 @@
 
 extern char Map[MAP_HEIGHT][MAP_WIDTH];
 
-void mapClear(void);
-void mapDraw(void);
+void mapClear();
+void mapDraw();
 void mapSet(uint8_t x, uint8_t y, char value);
 char mapGet(uint8_t x, uint8_t y);
 bool isInBounds(uint8_t x, uint8_t y);

@@ -1,0 +1,12 @@
+- connect jtag
+- fix issues related to map size
+- check if snake-on-snake collision works
+- write driver
+- remove arduino dependencies
+- add sound
+- order better buttons
+- figure out how to minimize everything and fit into a case
+- polish the game:
+    - multiple apples
+    - screen wrap
+    - game over screen & restart
