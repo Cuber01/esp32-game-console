@@ -16,8 +16,8 @@ InputKeys controllerGetInput()
 {
     if (digitalRead(INPUT_FORWARD)  == LOW) return INPUT_FORWARD;
     if (digitalRead(INPUT_BACKWARD) == LOW) return INPUT_BACKWARD;
-    if (digitalRead(INPUT_RIGHT)    == LOW) return INPUT_LEFT;
-    if (digitalRead(INPUT_LEFT)     == LOW) return INPUT_RIGHT;
+    if (digitalRead(INPUT_RIGHT)    == LOW) return INPUT_RIGHT;
+    if (digitalRead(INPUT_LEFT)     == LOW) return INPUT_LEFT;
     if (digitalRead(INPUT_PRESS)    == LOW) return INPUT_PRESS;
 
     return INPUT_NONE;
