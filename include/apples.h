@@ -8,8 +8,8 @@ extern point_t apples[MAX_APPLES];
 void PlaceApple(point_t applePos, point_t apples[MAX_APPLES]);
 point_t calculateApplePos(void);
 
-int appleAdd(point_t applePos);
-int appleDelete(point_t applePos);
+bool appleAdd(point_t applePos);
+bool appleDelete(point_t applePos);
 void applesClear();
 
 #endif
