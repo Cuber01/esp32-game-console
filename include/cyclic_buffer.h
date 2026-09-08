@@ -20,7 +20,7 @@ typedef struct
 
 void cbClear(void);
 void cbAdd(CBUFFER_TYPE value);
-void cbDel(void);
+void cbDelete(void);
 
 CBUFFER_TYPE cbGetHead(void);
 

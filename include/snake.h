@@ -1,9 +1,9 @@
-#ifndef __SNAKE_H
-#define __SNAKE_H
+#ifndef SNAKE_H
+#define SNAKE_H
 
 #include "game.h"
 #include "map.h"
-#include <cstdint>
+
 
 #include "controller.h"
 
@@ -26,11 +26,11 @@ typedef struct
     point_t snakeParts[MAX_SNAKES];
 } snake_t;
 
-void snakeInit(void);
-void snakeClear(void);
+void snakeInit();
+void snakeClear();
 void snakeMove(InputKeys direction, bool grow);
-void placeSnakeOnMap(void);
+void placeSnakeOnMap();
 
-point_t SnakeGet(void);
+point_t SnakeGet();
 
 #endif

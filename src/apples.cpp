@@ -7,7 +7,7 @@
 point_t apples[MAX_APPLES];
 int appleMultiplier = 1;
 
-point_t calculateApplePos(void)
+point_t calculateApplePos()
 {
     uint32_t apple_x = esp_random() % MAP_WIDTH + 0;
     uint32_t apple_y = esp_random() % MAP_HEIGHT + 0;

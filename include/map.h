@@ -11,12 +11,12 @@
 #define MAP_HEIGHT (SCREEN_WIDTH/MAP_BLOCK_SIZE)
 #define MAP_WIDTH (SCREEN_HEIGHT/MAP_BLOCK_SIZE)
 
-extern char Map[MAP_WIDTH][MAP_HEIGHT];
+extern char Map[MAP_HEIGHT][MAP_WIDTH];
 
 void mapClear(void);
 void mapDraw(void);
 void mapSet(uint8_t x, uint8_t y, char value);
 char mapGet(uint8_t x, uint8_t y);
-bool checkBounds(uint8_t x, uint8_t y);
+bool isInBounds(uint8_t x, uint8_t y);
 
 #endif

@@ -1,35 +1,35 @@
-#include <stdio.h>
+#include <cstdio>
 
 #include "map.h"
 
-char Map[MAP_WIDTH][MAP_HEIGHT];
+char Map[MAP_HEIGHT][MAP_WIDTH];
 
-void mapClear(void)
+void mapClear()
 {
-    for (int y = 0; y < MAP_HEIGHT; y++)
+    for (auto &row : Map)
     {
-        for (int x = 0; x < MAP_WIDTH; x++)
+        for (auto &cell : row)
         {
-            Map[x][y] = GROUND_SYMBOL;
-        };
-    };
+            cell = GROUND_SYMBOL;
+        }
+    }
 }
 
 void mapSet(uint8_t x, uint8_t y, char value)
 {
-    Map[x][y] = value;
+    Map[y][x] = value;
 }
 
 char mapGet(uint8_t x, uint8_t y)
 {
-    return (Map[x][y]);
+    return Map[y][x];
 }
 
-bool checkBounds(uint8_t x, uint8_t y)
+bool isInBounds(uint8_t x, uint8_t y)
 {
-    if (x > MAP_WIDTH - 1 || y > MAP_HEIGHT - 1)
+    if (x < MAP_WIDTH-1 && y < MAP_HEIGHT-1 && y > 0 && x > 0)
     {
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }

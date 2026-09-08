@@ -13,20 +13,19 @@ int frameDelay = 100;
 
 int applesEaten;
 
-void handleInput(char input, bool grow); 
-void clearArray(char Map[MAP_WIDTH][MAP_HEIGHT]);
+void handleInput(char input, bool grow);
 
 unsigned int time_counter=0;
 
-void draw( char Map[MAP_WIDTH][MAP_HEIGHT], point_t apples[MAX_APPLES] ) 
+void draw(point_t applePositions[MAX_APPLES])
 {
     placeSnakeOnMap();
 
     for (int i = 0; i < MAX_APPLES; i++) 
     {   
-        if ( apples[i].x != -1)
+        if (applePositions[i].x != -1)
         {
-            Map[apples[i].x][apples[i].y] = APPLE_SYMBOL;
+            mapSet(applePositions[i].x, applePositions[i].y, APPLE_SYMBOL);
         }
     }
 
@@ -34,17 +33,17 @@ void draw( char Map[MAP_WIDTH][MAP_HEIGHT], point_t apples[MAX_APPLES] )
 }
 
 
-void update(InputKeys input, point_t apples[MAX_APPLES])
+void update(InputKeys input, point_t applePositions[MAX_APPLES])
 {
-    point_t snake_postition = cbGetHead();
+    point_t snakePostition = cbGetHead();
     bool grow = false;
 
-    for ( int i = 0; i < MAX_APPLES; i++)
+    for (int i = 0; i < MAX_APPLES; i++)
     {
-        if (apples[i].x == snake_postition.x && apples[i].y == snake_postition.y) 
+        if (applePositions[i].x == snakePostition.x && applePositions[i].y == snakePostition.y)
         {
             applesEaten += 1;
-            appleDelete(apples[i]);
+            appleDelete(applePositions[i]);
             appleAdd(calculateApplePos());
             grow = true;
         } 
@@ -57,7 +56,7 @@ void gameLoop()
 {
     mapClear();
     update(controllerGetInput(), apples);
-    draw(Map, apples);
+    draw(apples);
     delay(frameDelay); // TODO is this correct delay?
 }
 

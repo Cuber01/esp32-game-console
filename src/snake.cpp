@@ -34,15 +34,17 @@ void placeSnakeOnMap()
         if (rv)
             break;
 
-        if (!checkBounds(point.x,point.y)) {
-            // TODO GAME OVER
+        // TODO what??
+        if (!isInBounds(point.x,point.y)) {
+            gameRunning = false;
+            break;
         }
         mapSet(point.x, point.y, SNAKE_SYMBOL);
     }
 
 }
 
-void snakeInit(void)
+void snakeInit()
 {
     cbClear();
 
@@ -56,43 +58,44 @@ void snakeMove(InputKeys direction, bool grow )
 {
     static InputKeys current_direction = INPUT_NONE;
 
-    point_t current_postition = cbGetHead();
-    point_t next_postition = current_postition;
+    point_t currentPostition = cbGetHead();
+    point_t nextPostition = currentPostition;
 
-    if( direction == INPUT_NONE ){
+    if(direction == INPUT_NONE)
+    {
         direction = current_direction;
     }
 
     switch (direction)
     {
     case INPUT_LEFT:
-        next_postition.x -= 1;        
+        nextPostition.x -= 1;
         break;
     case INPUT_RIGHT:
-        next_postition.x += 1;
+        nextPostition.x += 1;
         break;
     case INPUT_FORWARD:
-        next_postition.y -= 1;
+        nextPostition.y -= 1;
         break;
     case INPUT_BACKWARD:
-        next_postition.y += 1;    
+        nextPostition.y += 1;
         break;
     default:
         break;
     };
 
-    if( current_direction != INPUT_NONE ){
-        if (snakeCollision( next_postition, false )) {
-              gameRunning = false;
-        }    
+    if (current_direction != INPUT_NONE) {
+        if (snakeCollision( nextPostition, false )) {
+            gameRunning = false;
+        }
     }
 
-    cbAdd(next_postition);
 
+    cbAdd(nextPostition);
 
     if (!grow)
     {
-        cbDel();
+        cbDelete();
     } 
         
     current_direction = direction;
@@ -102,19 +105,21 @@ void snakeMove(InputKeys direction, bool grow )
 bool snakeCollision( point_t value, bool head_omit )
 {
     point_t current_value;
-    bool stop;       
     bool head_flag = head_omit;
 
     cbIterateReset();
 
     while (true)
     {
-        stop = cbIterateGet( &current_value );
-        if( stop ){
+        bool stop = cbIterateGet(&current_value);
+
+        if(stop)
+        {
             return false;
         }
-        if( ! head_flag ){
-            if( current_value.x == value.x && current_value.y == value.y) 
+        if(!head_flag)
+        {
+            if(current_value.x == value.x && current_value.y == value.y)
             {
                 return true;
             } 

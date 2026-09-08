@@ -1,6 +1,6 @@
 
 #include "graphics.h"
-#include <Adafruit_GFX.h>    // Core graphics library
+#include <Adafruit_GFX.h>
 #include <Adafruit_ST7789.h>
 
 #include "game.h"

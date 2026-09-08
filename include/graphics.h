@@ -7,7 +7,7 @@
 #define SCREEN_DC        17
 
 #define SCREEN_WIDTH 240
-#define SCREEN_HEIGHT 280
+#define SCREEN_HEIGHT 320
 #define MAP_BLOCK_SIZE 8
 
 #endif //ESP32_GAME_CONSOLE_GRAPHICS_H

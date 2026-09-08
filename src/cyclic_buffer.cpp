@@ -49,10 +49,8 @@ void cb_dump(void)
 // clears all from buffer
 void cbClear(void)
 {
-
     cyclic_buffer.state.head_index = 0;
     cyclic_buffer.state.tail_index = 0;
-
 }
 
 // add value to the head
@@ -63,12 +61,12 @@ void cbAdd(CBUFFER_TYPE value)
 }
 
 // delete value from tail
-void cbDel(void)
+void cbDelete(void)
 {
     cyclic_buffer.state.tail_index++;
 }
 
-void cbIterateReset(void)
+void cbIterateReset()
 {
     current_index = cyclic_buffer.state.head_index;
 }
@@ -86,12 +84,12 @@ int cbIterateGet(CBUFFER_TYPE *value_ref)
     return false;
 }
 
-CBUFFER_TYPE cbGetHead(void)
+CBUFFER_TYPE cbGetHead()
 {
     return (cyclic_buffer.buffer[cyclic_buffer.state.head_index]);
 }
 
-CBUFFER_TYPE cbGetTail(void)
+CBUFFER_TYPE cbGetTail()
 {
     return (cyclic_buffer.buffer[cyclic_buffer.state.tail_index]);
 }
