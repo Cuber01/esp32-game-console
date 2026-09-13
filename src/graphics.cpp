@@ -31,10 +31,13 @@ void mapDraw(void)
     {
         for (int x = 0; x < MAP_WIDTH; x++)
         {
+            //tft.fillRect(0,0,MAP_HEIGHT*MAP_BLOCK_SIZE, MAP_WIDTH*MAP_BLOCK_SIZE, ST77XX_WHITE);
             if (mapGet(x,y) == APPLE_SYMBOL) {
-                tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_RED);
+                 tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_RED);
             } else if (mapGet(x,y) == SNAKE_SYMBOL) {
-                tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_GREEN);
+                 tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_GREEN);
+            } else if (mapGet(x,y) == GROUND_SYMBOL) {
+                 tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_WHITE);
             }
         };
     };
