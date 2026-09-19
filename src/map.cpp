@@ -15,19 +15,20 @@ void mapClear()
     }
 }
 
-void mapSet(uint8_t x, uint8_t y, char value)
+void mapSet(int8_t x, int8_t y, char value)
 {
     Map[y][x] = value;
 }
 
-char mapGet(uint8_t x, uint8_t y)
+char mapGet(int8_t x, int8_t y)
 {
     return Map[y][x];
 }
 
-bool isInBounds(uint8_t x, uint8_t y)
+bool isInBounds(int8_t x, int8_t y)
 {
-    if (x < MAP_WIDTH-1 && y < MAP_HEIGHT-1 && y > 0 && x > 0)
+    // y is offset from the top by "apples: x" si
+    if (x < MAP_WIDTH && y < MAP_HEIGHT && y > 0 && x > -1)
     {
         return true;
     }

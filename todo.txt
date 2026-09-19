@@ -1,5 +1,5 @@
 X connect jtag
-- fix issues related to map size
+X fix issues related to map size
 - check if snake-on-snake collision works
 - write driver
 - remove arduino dependencies
