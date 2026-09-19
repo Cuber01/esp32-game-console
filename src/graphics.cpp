@@ -19,30 +19,43 @@ void init() {
     //tft.setSPISpeed(40000000);
 }
 
+void appleCounterDraw() {
+    tft.setCursor(0, 0);
+    tft.setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
+    tft.setTextWrap(false);
+    tft.print("apples: ");
 
-void mapDraw()
+    // Clear last number
+    int16_t lastX = tft.getCursorX();
+    int16_t lastY = tft.getCursorY();
+    tft.setTextColor(ST77XX_MAGENTA, ST77XX_BLACK);
+    tft.print(" ");
+    //ESP.getFreeHeap()
+    tft.setCursor(lastX, lastY);
+    tft.setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
+    tft.print(applesEaten);
+}
+
+void mapDraw() {
+    for (int y = 1; y < MAP_HEIGHT; y++)
+    {
+        for (int x = 0; x < MAP_WIDTH; x++)
+        {
+            if (mapGet(x,y) == APPLE_SYMBOL) {
+                tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_RED);
+            } else if (mapGet(x,y) == SNAKE_SYMBOL) {
+                tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_GREEN);
+            } else if (mapGet(x,y) == GROUND_SYMBOL) {
+                tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_WHITE);
+            }
+        }
+    }
+}
+
+void gameDraw()
 {
-
-     tft.setCursor(0, 0);
-     tft.setTextColor(ST77XX_YELLOW);
-     tft.setTextWrap(false);
-     tft.print("apples: ");
-     tft.print(applesEaten);
-
-     for (int y = 1; y < MAP_HEIGHT; y++)
-     {
-         for (int x = 0; x < MAP_WIDTH; x++)
-         {
-             if (mapGet(x,y) == APPLE_SYMBOL) {
-                  tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_RED);
-             } else if (mapGet(x,y) == SNAKE_SYMBOL) {
-                  tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_GREEN);
-             } else if (mapGet(x,y) == GROUND_SYMBOL) {
-                  tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_WHITE);
-             }
-         };
-     };
-
+    appleCounterDraw();
+    mapDraw();
 }
 
 void graphicsDemo() {

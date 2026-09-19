@@ -29,7 +29,7 @@ void draw(point_t applePositions[MAX_APPLES])
         }
     }
 
-   mapDraw();
+   gameDraw();
 }
 
 
