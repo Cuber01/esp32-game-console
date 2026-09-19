@@ -34,7 +34,6 @@ void placeSnakeOnMap()
         if (rv)
             break;
 
-        // TODO what??
         if (!isInBounds(point.x,point.y)) {
             gameRunning = false;
             break;

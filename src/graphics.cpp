@@ -15,30 +15,51 @@ Adafruit_ST7789 tft = Adafruit_ST7789(SCREEN_CS, SCREEN_DC, SCREEN_RST);
 
 void init() {
     tft.init(SCREEN_WIDTH, SCREEN_HEIGHT);
+    tft.fillScreen(0);
+    //tft.setSPISpeed(40000000);
 }
 
-void mapDraw(void)
+int X = 0;
+int Y = 0;
+void mapDraw()
 {
-    tft.fillScreen(ST77XX_BLACK);
+    //tft.fillScreen(ST77XX_WHITE);
+    //
+    // tft.setCursor(0, 0);
+    // tft.setTextColor(ST77XX_WHITE);
+    // tft.setTextWrap(false);
+    // tft.print("apples: ");
+    // tft.print(applesEaten);
+    //
+    // for (int y = 0; y < MAP_HEIGHT; y++)
+    // {
+    //     for (int x = 0; x < MAP_WIDTH; x++)
+    //     {
+    //         // if (mapGet(x,y) == APPLE_SYMBOL) {
+    //         //      tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_RED);
+    //         // } else if (mapGet(x,y) == SNAKE_SYMBOL) {
+    //         //      tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_GREEN);
+    //         // } else if (mapGet(x,y) == GROUND_SYMBOL) {
+    //         //      tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_WHITE);
+    //         // }
+    //     };
+    // };
+    //
 
-    tft.setCursor(0, 0);
-    tft.setTextColor(ST77XX_WHITE);
-    tft.setTextWrap(false);
-    tft.print("apples: ");
-    tft.print(applesEaten);
+    tft.fillRect(X*MAP_BLOCK_SIZE,Y*MAP_BLOCK_SIZE,MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_WHITE);
+    if (X >= MAP_WIDTH) {
+        X = 0;
+        Y += 1;
+    } else {
+        X += 1;
+    }
 
-    for (int y = 0; y < MAP_HEIGHT; y++)
-    {
-        for (int x = 0; x < MAP_WIDTH; x++)
-        {
-            //tft.fillRect(0,0,MAP_HEIGHT*MAP_BLOCK_SIZE, MAP_WIDTH*MAP_BLOCK_SIZE, ST77XX_WHITE);
-            if (mapGet(x,y) == APPLE_SYMBOL) {
-                 tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_RED);
-            } else if (mapGet(x,y) == SNAKE_SYMBOL) {
-                 tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_GREEN);
-            } else if (mapGet(x,y) == GROUND_SYMBOL) {
-                 tft.fillRect(x*MAP_BLOCK_SIZE, y*MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_WHITE);
-            }
-        };
-    };
+
+    // tft.fillRect(0, 0, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_BLUE);
+    //
+    tft.fillRect(MAP_WIDTH*8 -8, MAP_HEIGHT*8 -8, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_CYAN);
+    tft.fillRect(MAP_WIDTH*8 -8, 0, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_YELLOW);
+    tft.fillRect(0, MAP_HEIGHT*8 -8, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_MAGENTA);
+    tft.fillRect(0, 0, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_ORANGE);
+
 }
