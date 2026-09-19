@@ -1,6 +1,6 @@
 X connect jtag
 X fix issues related to map size
-- check if snake-on-snake collision works
+X check if snake-on-snake collision works
 - write driver
 - remove arduino dependencies
 - add sound
@@ -8,5 +8,6 @@ X fix issues related to map size
 - figure out how to minimize everything and fit into a case
 - polish the game:
     - multiple apples
+    - make it impossible for snake head to move into its neck itself
     - screen wrap
     - game over screen & restart

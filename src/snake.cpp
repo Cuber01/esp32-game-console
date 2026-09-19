@@ -51,6 +51,12 @@ void snakeInit()
     cbAdd((point_t){.x = 8, .y = 3});
     cbAdd((point_t){.x = 7, .y = 3});
     cbAdd((point_t){.x = 6, .y = 3});
+    cbAdd((point_t){.x = 5, .y = 3});
+    cbAdd((point_t){.x = 4, .y = 3});
+    cbAdd((point_t){.x = 3, .y = 3});
+    cbAdd((point_t){.x = 2, .y = 3});
+    cbAdd((point_t){.x = 1, .y = 3});
+    cbAdd((point_t){.x = 0, .y = 3});
 }
 
 void snakeMove(InputKeys direction, bool grow )
