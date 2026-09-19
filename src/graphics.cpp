@@ -29,11 +29,12 @@ void appleCounterDraw() {
     int16_t lastX = tft.getCursorX();
     int16_t lastY = tft.getCursorY();
     tft.setTextColor(ST77XX_MAGENTA, ST77XX_BLACK);
-    tft.print("   ");
-    //ESP.getFreeHeap()
+    tft.print("      ");
+
     tft.setCursor(lastX, lastY);
     tft.setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
     tft.print(applesEaten);
+    //ESP.getFreeHeap()
 }
 
 void mapDraw() {

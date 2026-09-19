@@ -1,7 +1,7 @@
 X connect jtag
 X fix issues related to map size
 X check if snake-on-snake collision works
-- fix crash after a few minutes: memory corruption / heap / stack overflow suspected
+- fix crash after a few minutes: memory corruption / stack overflow suspected
 - write driver
 - remove arduino dependencies
 - add sound
