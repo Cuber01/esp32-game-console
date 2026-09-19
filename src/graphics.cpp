@@ -29,7 +29,7 @@ void appleCounterDraw() {
     int16_t lastX = tft.getCursorX();
     int16_t lastY = tft.getCursorY();
     tft.setTextColor(ST77XX_MAGENTA, ST77XX_BLACK);
-    tft.print(" ");
+    tft.print("   ");
     //ESP.getFreeHeap()
     tft.setCursor(lastX, lastY);
     tft.setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
