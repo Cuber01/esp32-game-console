@@ -17,12 +17,12 @@ void mapClear()
 
 void mapSet(int8_t x, int8_t y, char value)
 {
-    Map[y][x] = value;
+    Map[y][x] = value; //TODO
 }
 
 char mapGet(int8_t x, int8_t y)
 {
-    return Map[y][x];
+    return Map[y][x];//TODO
 }
 
 bool isInBounds(int8_t x, int8_t y)

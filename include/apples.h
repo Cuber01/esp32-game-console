@@ -1,15 +1,14 @@
 #ifndef __APPLES_H
 #define __APPLES_H
 
-#define MAX_APPLES 10
-extern point_t apples[MAX_APPLES];
+#include "game.h"
 
+extern int ApplesEaten;
+extern point_t CurrentApple;
 
-void PlaceApple(point_t applePos, point_t apples[MAX_APPLES]);
 point_t calculateApplePos(void);
 
-bool appleAdd(point_t applePos);
-bool appleDelete(point_t applePos);
-void applesClear();
+void createApple(point_t applePos);
+void appleRemove();
 
 #endif

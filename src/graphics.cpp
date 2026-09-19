@@ -3,6 +3,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7789.h>
 
+#include "apples.h"
 #include "game.h"
 #include "map.h"
 
@@ -33,7 +34,7 @@ void appleCounterDraw() {
 
     tft.setCursor(lastX, lastY);
     tft.setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
-    tft.print(applesEaten);
+    tft.print(ApplesEaten);
     //ESP.getFreeHeap()
 }
 

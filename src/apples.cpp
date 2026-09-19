@@ -4,62 +4,24 @@
 #include "map.h"
 #include "apples.h"
 
-point_t apples[MAX_APPLES];
-int appleMultiplier = 1;
+point_t CurrentApple = (point_t){.x = -1, .y = -1};
+int ApplesEaten = 0;
 
 point_t calculateApplePos()
 {
-    uint32_t apple_x = esp_random() % MAP_WIDTH + 0;
-    uint32_t apple_y = esp_random() % MAP_HEIGHT + 0;
+    uint32_t apple_x = esp_random() % MAP_WIDTH;
+    uint32_t apple_y = esp_random() % MAP_HEIGHT + 1; // Offset for apples counter
 
     return (point_t){ .x = (int)apple_x, .y = (int)apple_y };
 }
 
-void applesClear()
+
+void createApple(point_t applePos)
 {
-    for (uint16_t i = 0; i < MAX_APPLES; i++)
-    {
-        apples[i] = (point_t){.x = -1, .y = -1};
-    }
+    CurrentApple = applePos;
 }
 
-bool appleAdd(point_t applePos)
+void appleRemove()
 {
-    for (int i = 0; i < MAX_APPLES; i++)
-    {
-        if (apples[i].x == -1)
-        {
-            apples[i] = applePos;
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool appleDelete(point_t applePos)
-{
-    for (uint16_t i = 0; i < MAX_APPLES; i++)
-    {
-        if (apples[i].x == applePos.x && apples[i].y == applePos.y)
-        {
-            apples[i] = (point_t){.x = -1, .y = -1};
-            return true;
-        }
-    }
-
-    return false;
-}
-
-int appleContains(point_t applePos)
-{
-    for (uint16_t i = 0; i < MAX_APPLES; i++)
-    {
-        if (apples[i].x == applePos.x && apples[i].y == applePos.y)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    CurrentApple = (point_t){.x = -1, .y = -1};
 }

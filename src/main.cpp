@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "game.h"
+#include "apples.h"
 
 void setup() {
     Serial.begin(9600);
@@ -13,6 +14,10 @@ void setup() {
 }
 
 void loop() {
+    for (int i = 0; i < 1000; i++) {
+        calculateApplePos();
+    }
+
     if (gameRunning) {
         gameLoop();
     }
