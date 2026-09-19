@@ -8,9 +8,9 @@ point_t CurrentApple = (point_t){.x = -1, .y = -1};
 int ApplesEaten = 0;
 
 point_t calculateApplePos()
-{
-    uint32_t apple_x = esp_random() % MAP_WIDTH;
-    uint32_t apple_y = esp_random() % MAP_HEIGHT + 1; // Offset for apples counter
+{  
+    uint32_t apple_x = esp_random() % MAP_WIDTH + 0;
+    uint32_t apple_y = (esp_random() % (MAP_HEIGHT-1) ) + 1;
 
     return (point_t){ .x = (int)apple_x, .y = (int)apple_y };
 }

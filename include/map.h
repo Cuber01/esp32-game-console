@@ -2,6 +2,7 @@
 #define __MAP_H
 
 #include "graphics.h"
+#include "game.h"
 #include <cstdint>
 
 #define GROUND_SYMBOL ' '
@@ -17,6 +18,7 @@ void mapClear();
 void gameDraw();
 void mapSet(int8_t x, int8_t y, char value);
 char mapGet(int8_t x, int8_t y);
-bool isInBounds(int8_t x, int8_t y);
+bool IsInBounds(int8_t x, int8_t y);
+bool IsInBounds(point_t p);
 
 #endif

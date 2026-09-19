@@ -1,8 +1,8 @@
 X connect jtag
 X fix issues related to map size
 X check if snake-on-snake collision works
-- fix crash after a few minutes: memory corruption / stack overflow suspected
-- fix issue where apple does not reappear
+- fix crash after a few minutes: memory corruption / stack overflow suspected: check cyclic buffer and map
+X fix issue where apple does not reappear
 - write driver
 - remove arduino dependencies
 - add sound
