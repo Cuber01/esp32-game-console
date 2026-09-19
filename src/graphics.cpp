@@ -19,8 +19,7 @@ void init() {
     //tft.setSPISpeed(40000000);
 }
 
-int X = 0;
-int Y = 0;
+
 void mapDraw()
 {
     //tft.fillScreen(ST77XX_WHITE);
@@ -46,6 +45,14 @@ void mapDraw()
     // };
     //
 
+
+
+}
+
+void graphicsDemo() {
+    static int X = 0;
+    static int Y = 0;
+
     tft.fillRect(X*MAP_BLOCK_SIZE,Y*MAP_BLOCK_SIZE,MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_WHITE);
     if (X >= MAP_WIDTH) {
         X = 0;
@@ -54,12 +61,8 @@ void mapDraw()
         X += 1;
     }
 
-
-    // tft.fillRect(0, 0, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_BLUE);
-    //
     tft.fillRect(MAP_WIDTH*8 -8, MAP_HEIGHT*8 -8, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_CYAN);
     tft.fillRect(MAP_WIDTH*8 -8, 0, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_YELLOW);
     tft.fillRect(0, MAP_HEIGHT*8 -8, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_MAGENTA);
     tft.fillRect(0, 0, MAP_BLOCK_SIZE, MAP_BLOCK_SIZE, ST77XX_ORANGE);
-
 }
