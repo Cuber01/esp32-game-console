@@ -13,7 +13,7 @@ void setup() {
 }
 
 void loop() {
-    if (gameRunning) {
+    if (IsRunning()) {
         gameLoop();
     }
 }

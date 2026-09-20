@@ -6,7 +6,7 @@
 #include "apples.h"
 #include "snake.h"
 #include "map.h"
-#include "cyclic_buffer.h"
+#include "fixed_list.h"
 
 bool gameRunning = true;
 int frameDelay = 100;
@@ -25,7 +25,7 @@ void draw()
 
 void update(InputKeys input)
 {
-    point_t snakePostition = cbGetHead();
+    Point& snakePostition = SnakeParts.GetHead();
     bool grow = false;
 
     if (CurrentApple.x == snakePostition.x && CurrentApple.y == snakePostition.y) {
@@ -43,7 +43,7 @@ void gameLoop()
     mapClear();
     update(controllerGetInput());
     draw();
-    delay(frameDelay); // TODO is this correct delay?
+    delay(frameDelay);
 }
 
 void gameInit()
@@ -51,6 +51,14 @@ void gameInit()
     controllerInit();
     snakeInit();
     createApple(calculateApplePos());
+}
+
+bool IsRunning() {
+    return gameRunning;
+}
+
+void EndGame() {
+    gameRunning = false;
 }
 
 

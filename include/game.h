@@ -1,15 +1,15 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
-extern bool gameRunning;
-
 typedef struct
 {
     int x;
     int y;
-} point_t;
+} Point;
 
 void gameLoop();
 void gameInit();
+void EndGame();
+bool IsRunning();
 
 #endif

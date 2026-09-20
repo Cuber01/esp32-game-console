@@ -4,11 +4,11 @@
 #include "game.h"
 
 extern int ApplesEaten;
-extern point_t CurrentApple;
+extern Point CurrentApple;
 
-point_t calculateApplePos(void);
+Point calculateApplePos(void);
 
-void createApple(point_t applePos);
+void createApple(Point applePos);
 void appleRemove();
 
 #endif

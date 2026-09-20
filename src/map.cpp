@@ -39,7 +39,7 @@ bool IsInBounds(int8_t x, int8_t y)
     return false;
 }
 
-bool IsInBounds(point_t p)
+bool IsInBounds(Point p)
 {
     return IsInBounds(p.x, p.y);
 }

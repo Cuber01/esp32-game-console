@@ -3,16 +3,13 @@
 
 #include "game.h"
 #include "map.h"
-
-
+#include "fixed_circular_queue.h"
 #include "controller.h"
 
 #define MAX_SNAKES (MAP_WIDTH * MAP_HEIGHT)
 
-extern point_t snakeParts[MAX_SNAKES];
+extern FixedCircularQueue<Point, MAX_SNAKES> SnakeParts;
 
-extern int snake_vel_x;
-extern int snake_vel_y;
 
 typedef struct
 {
@@ -23,7 +20,7 @@ typedef struct
 typedef struct
 {
     snakeElementState state;
-    point_t snakeParts[MAX_SNAKES];
+    Point snakeParts[MAX_SNAKES];
 } snake_t;
 
 void snakeInit();
@@ -31,6 +28,5 @@ void snakeClear();
 void snakeMove(InputKeys direction, bool grow);
 void placeSnakeOnMap();
 
-point_t SnakeGet();
 
 #endif

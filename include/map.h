@@ -19,6 +19,6 @@ void gameDraw();
 void mapSet(int8_t x, int8_t y, char value);
 char mapGet(int8_t x, int8_t y);
 bool IsInBounds(int8_t x, int8_t y);
-bool IsInBounds(point_t p);
+bool IsInBounds(Point p);
 
 #endif

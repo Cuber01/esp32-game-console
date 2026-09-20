@@ -1,70 +1,50 @@
-#include <cstdio>
-
 #include "game.h"
 #include "snake.h"
-#include "cyclic_buffer.h"
+
+#include <HardwareSerial.h>
+
+#include "fixed_circular_queue.h"
 #include "map.h"
 #include "controller.h"
 
-int snake_vel_x = 1;
-int snake_vel_y = 0;
+FixedCircularQueue<Point, MAX_SNAKES> SnakeParts;
 
-bool snakeCollision( point_t value, bool head_omit);
-
-void snakeClear()
-{
-    snakeInit();
-}
-
-point_t SnakeGet()
-{
-    return cbGetHead();
-}
+bool snakeCollision();
 
 void placeSnakeOnMap()
 {
-    point_t point;
-    int rv;
-
-    cbIterateReset();
-
-    while (true)
-    {
-        rv = cbIterateGet(&point);
-        if (rv)
-            break;
-
+    for (size_t i = SnakeParts.GetTailIndex(); i <= SnakeParts.GetHeadIndex(); i++) {
+        const Point& point = SnakeParts[i];
         if (!IsInBounds(point.x,point.y)) {
-            gameRunning = false;
+            EndGame();
             break;
         }
+
         mapSet(point.x, point.y, SNAKE_SYMBOL);
     }
-
 }
 
 void snakeInit()
 {
-    cbClear();
+    SnakeParts.Clear();
+    SnakeParts.PushHead((Point){.x = 9, .y = 3});
+    SnakeParts.PushHead((Point){.x = 8, .y = 3});
+    SnakeParts.PushHead((Point){.x = 7, .y = 3});
+    SnakeParts.PushHead((Point){.x = 6, .y = 3});
+    SnakeParts.PushHead((Point){.x = 5, .y = 3});
+    SnakeParts.PushHead((Point){.x = 4, .y = 3});
+    SnakeParts.PushHead((Point){.x = 3, .y = 3});
+    SnakeParts.PushHead((Point){.x = 2, .y = 3});
+    SnakeParts.PushHead((Point){.x = 1, .y = 3});
 
-    cbAdd((point_t){.x = 9, .y = 3});
-    cbAdd((point_t){.x = 8, .y = 3});
-    cbAdd((point_t){.x = 7, .y = 3});
-    cbAdd((point_t){.x = 6, .y = 3});
-    cbAdd((point_t){.x = 5, .y = 3});
-    cbAdd((point_t){.x = 4, .y = 3});
-    cbAdd((point_t){.x = 3, .y = 3});
-    cbAdd((point_t){.x = 2, .y = 3});
-    cbAdd((point_t){.x = 1, .y = 3});
-    cbAdd((point_t){.x = 0, .y = 3});
 }
 
 void snakeMove(InputKeys direction, bool grow )
 {
     static InputKeys current_direction = INPUT_NONE;
 
-    point_t currentPostition = cbGetHead();
-    point_t nextPostition = currentPostition;
+    Point& currentPosition = SnakeParts.GetHead();
+    Point nextPosition = currentPosition;
 
     if(direction == INPUT_NONE)
     {
@@ -74,63 +54,46 @@ void snakeMove(InputKeys direction, bool grow )
     switch (direction)
     {
     case INPUT_LEFT:
-        nextPostition.x -= 1;
+        nextPosition.x -= 1;
         break;
     case INPUT_RIGHT:
-        nextPostition.x += 1;
+        nextPosition.x += 1;
         break;
     case INPUT_FORWARD:
-        nextPostition.y -= 1;
+        nextPosition.y -= 1;
         break;
     case INPUT_BACKWARD:
-        nextPostition.y += 1;
+        nextPosition.y += 1;
         break;
     default:
         break;
     };
 
     if (current_direction != INPUT_NONE) {
-        if (snakeCollision( nextPostition, false )) {
-            gameRunning = false;
+        if (snakeCollision()) {
+            EndGame();
         }
+
+        SnakeParts.PushHead(nextPosition);
     }
-
-
-    cbAdd(nextPostition);
 
     if (!grow)
     {
-        cbDelete();
+        SnakeParts.PopTail();
     } 
         
     current_direction = direction;
-    
 }
 
-bool snakeCollision( point_t value, bool head_omit )
+bool snakeCollision()
 {
-    point_t current_value;
-    bool head_flag = head_omit;
+    Point& head = SnakeParts.GetHead();
+    for (size_t i = SnakeParts.GetTailIndex(); i <= SnakeParts.GetHeadIndex(); i++) {
+        Point& item = SnakeParts[i];
 
-    cbIterateReset();
-
-    while (true)
-    {
-        bool stop = cbIterateGet(&current_value);
-
-        if(stop)
-        {
-            return false;
+        if (&head != &item && head.x == item.x && head.y == item.y) {
+            return true;
         }
-        if(!head_flag)
-        {
-            if(current_value.x == value.x && current_value.y == value.y)
-            {
-                return true;
-            } 
-            head_flag = false;
-        }
-
     }
 
     return false;
