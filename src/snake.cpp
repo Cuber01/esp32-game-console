@@ -7,13 +7,13 @@
 #include "map.h"
 #include "controller.h"
 
-FixedCircularQueue<Point, MAX_SNAKES> SnakeParts = FixedCircularQueue<Point, MAX_SNAKES>((Point){.x = 9, .y = 3});
+FixedCircularQueue<Point, MAX_SNAKES> SnakeParts = FixedCircularQueue<Point, MAX_SNAKES>();
 
-bool snakeCollision();
+bool snakeCollision(Point& nextPos);
 
 void placeSnakeOnMap()
 {
-    for (size_t i = 0; i < SnakeParts.Size(); i++) {
+    for (size_t i = 1; i < SnakeParts.Size(); i++) {
         const Point& point = SnakeParts[i];
         if (!IsInBounds(point.x, point.y)) {
             EndGame();
@@ -76,7 +76,7 @@ void snakeMove(InputKeys direction, bool grow)
 
     if (direction != INPUT_NONE)
     {
-        if (snakeCollision()) {
+        if (snakeCollision(nextPosition)) {
             EndGame();
         }
 
@@ -91,16 +91,11 @@ void snakeMove(InputKeys direction, bool grow)
     }
 }
 
-void snakeExecuteMove() {
-
-}
-
-bool snakeCollision()
+bool snakeCollision(Point& nextPos)
 {
-    Point& head = SnakeParts.GetHead();
-    for (size_t i = 0; i < SnakeParts.Size() - 1; i++) {
-        Point& item = SnakeParts[i];
-        if (head.x == item.x && head.y == item.y) {
+    for (size_t i = 1; i < SnakeParts.Size(); i++) {
+        Point& part = SnakeParts[i];
+        if (&part != &SnakeParts.GetHead() && nextPos.x == part.x && nextPos.y == part.y) {
             return true;
         }
     }

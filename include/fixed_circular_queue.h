@@ -11,13 +11,11 @@ private:
     std::size_t count = 0;
 
 public:
-    FixedCircularQueue(const T& firstElement) {
+    FixedCircularQueue() {
         data.fill(T{});
-        data[0] = firstElement;
         head = 0;
         tail = 0;
-        count = 1;
-
+        count = 0;
     }
 
     void PushHead(const T& value) {
