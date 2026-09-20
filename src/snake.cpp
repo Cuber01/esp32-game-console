@@ -25,14 +25,14 @@ void placeSnakeOnMap()
 
 void snakeInit()
 {
-    SnakeParts.PushHead((Point){.x = 8, .y = 3});
-    SnakeParts.PushHead((Point){.x = 7, .y = 3});
-    SnakeParts.PushHead((Point){.x = 6, .y = 3});
-    SnakeParts.PushHead((Point){.x = 5, .y = 3});
-    SnakeParts.PushHead((Point){.x = 4, .y = 3});
-    SnakeParts.PushHead((Point){.x = 3, .y = 3});
-    SnakeParts.PushHead((Point){.x = 2, .y = 3});
     SnakeParts.PushHead((Point){.x = 1, .y = 3});
+    SnakeParts.PushHead((Point){.x = 2, .y = 3});
+    SnakeParts.PushHead((Point){.x = 3, .y = 3});
+    SnakeParts.PushHead((Point){.x = 4, .y = 3});
+    SnakeParts.PushHead((Point){.x = 5, .y = 3});
+    SnakeParts.PushHead((Point){.x = 6, .y = 3});
+    SnakeParts.PushHead((Point){.x = 7, .y = 3});
+    SnakeParts.PushHead((Point){.x = 8, .y = 3});
 }
 
 void snakeMove(InputKeys direction, bool grow)
