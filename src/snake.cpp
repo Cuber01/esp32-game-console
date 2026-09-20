@@ -41,6 +41,11 @@ void snakeMove(InputKeys direction, bool grow)
 
     Point nextPosition = SnakeParts.GetHead();
 
+    // Fix for edge case bug that happens when starting the game
+    if (current_direction == INPUT_NONE && direction == INPUT_LEFT) {
+        direction = INPUT_NONE;
+    }
+
     if     (direction == INPUT_NONE
         || (direction == INPUT_PRESS)
         || (direction == INPUT_RIGHT && current_direction == INPUT_LEFT)

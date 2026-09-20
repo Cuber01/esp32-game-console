@@ -3,6 +3,7 @@ X fix issues related to map size
 X check if snake-on-snake collision works
 X fix crash after a few minutes: memory corruption / stack overflow suspected: check cyclic buffer
 X fix issue where apple does not reappear
+- fix apples spawning on snake
 - write driver
 - remove arduino dependencies
 - add sound
