@@ -11,10 +11,19 @@ private:
     std::size_t count = 0;
 
 public:
-    void PushHead(const T& point) {
+    FixedCircularQueue(const T& firstElement) {
+        data.fill(T{});
+        data[0] = firstElement;
+        head = 0;
+        tail = 0;
+        count = 1;
+
+    }
+
+    void PushHead(const T& value) {
         assert(count < N && "Snake overflow");
         head = (head + 1) % N;
-        data[head] = point;
+        data[head] = value;
         count++;
     }
 
@@ -22,13 +31,6 @@ public:
         assert(count > 0 && "Snake underflow");
         tail = (tail + 1) % N;
         count--;
-    }
-
-    void Clear() {
-        head = 0;
-        tail = 0;
-        count = 0;
-        data.fill(T{});
     }
 
     T& GetHead() noexcept {

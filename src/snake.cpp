@@ -7,27 +7,25 @@
 #include "map.h"
 #include "controller.h"
 
-FixedCircularQueue<Point, MAX_SNAKES> SnakeParts;
+FixedCircularQueue<Point, MAX_SNAKES> SnakeParts = FixedCircularQueue<Point, MAX_SNAKES>((Point){.x = 9, .y = 3});
 
 bool snakeCollision();
 
 void placeSnakeOnMap()
 {
-    for (size_t i = SnakeParts.GetTailIndex(); i <= SnakeParts.GetHeadIndex(); i++) {
+    // TODO: fix iterator for when head < tail
+    for (size_t i = 0; i < SnakeParts.Size(); i++) {
         const Point& point = SnakeParts[i];
-        if (!IsInBounds(point.x,point.y)) {
+        if (!IsInBounds(point.x, point.y)) {
             EndGame();
             break;
         }
-
         mapSet(point.x, point.y, SNAKE_SYMBOL);
     }
 }
 
 void snakeInit()
 {
-    SnakeParts.Clear();
-    SnakeParts.PushHead((Point){.x = 9, .y = 3});
     SnakeParts.PushHead((Point){.x = 8, .y = 3});
     SnakeParts.PushHead((Point){.x = 7, .y = 3});
     SnakeParts.PushHead((Point){.x = 6, .y = 3});
@@ -36,7 +34,6 @@ void snakeInit()
     SnakeParts.PushHead((Point){.x = 3, .y = 3});
     SnakeParts.PushHead((Point){.x = 2, .y = 3});
     SnakeParts.PushHead((Point){.x = 1, .y = 3});
-
 }
 
 void snakeMove(InputKeys direction, bool grow )
@@ -75,12 +72,16 @@ void snakeMove(InputKeys direction, bool grow )
         }
 
         SnakeParts.PushHead(nextPosition);
+
+        if (!grow)
+        {
+            SnakeParts.PopTail();
+        }
     }
 
-    if (!grow)
-    {
-        SnakeParts.PopTail();
-    } 
+
+
+
         
     current_direction = direction;
 }
@@ -88,10 +89,9 @@ void snakeMove(InputKeys direction, bool grow )
 bool snakeCollision()
 {
     Point& head = SnakeParts.GetHead();
-    for (size_t i = SnakeParts.GetTailIndex(); i <= SnakeParts.GetHeadIndex(); i++) {
+    for (size_t i = 0; i < SnakeParts.Size() - 1; i++) {
         Point& item = SnakeParts[i];
-
-        if (&head != &item && head.x == item.x && head.y == item.y) {
+        if (head.x == item.x && head.y == item.y) {
             return true;
         }
     }
