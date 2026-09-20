@@ -42,6 +42,7 @@ void snakeMove(InputKeys direction, bool grow)
     Point nextPosition = SnakeParts.GetHead();
 
     if     (direction == INPUT_NONE
+        || (direction == INPUT_PRESS)
         || (direction == INPUT_RIGHT && current_direction == INPUT_LEFT)
         || (direction == INPUT_LEFT && current_direction == INPUT_RIGHT)
         || (direction == INPUT_FORWARD && current_direction == INPUT_BACKWARD)
