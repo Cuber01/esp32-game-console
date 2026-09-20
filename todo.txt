@@ -10,7 +10,7 @@ X fix issue where apple does not reappear
 - order better buttons
 - figure out how to minimize everything and fit into a case
 - polish the game:
-    - multiple apples
-    - make it impossible for snake head to move into its neck itself
-    - screen wrap
+    ~ multiple apples
+    X make it impossible for snake head to move into its neck itself
+    ~ screen wrap
     - game over screen & restart
