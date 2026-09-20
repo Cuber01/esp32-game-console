@@ -8,23 +8,25 @@ char Map[MAP_HEIGHT][MAP_WIDTH];
 
 void mapClear()
 {
-    for (auto &row : Map)
+    for (int i = 0; i < MAP_HEIGHT; i++)
     {
-        for (auto &cell : row)
+        for (int j = 0; j < MAP_WIDTH; j++)
         {
-            cell = GROUND_SYMBOL;
+            Map[i][j] = GROUND_SYMBOL;
         }
     }
 }
 
 void mapSet(int8_t x, int8_t y, char value)
 {
-    Map[y][x] = value; //TODO
+    assert(IsInBounds(x, y));
+    Map[y][x] = value;
 }
 
 char mapGet(int8_t x, int8_t y)
 {
-    return Map[y][x];//TODO
+    assert(IsInBounds(x, y));
+    return Map[y][x];
 }
 
 bool IsInBounds(int8_t x, int8_t y)

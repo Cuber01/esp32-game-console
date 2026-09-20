@@ -11,6 +11,8 @@ point_t calculateApplePos()
 {  
     uint32_t apple_x = esp_random() % MAP_WIDTH + 0;
     uint32_t apple_y = (esp_random() % (MAP_HEIGHT-1) ) + 1;
+    assert(IsInBounds((int)apple_x, (int)apple_y));
+
 
     return (point_t){ .x = (int)apple_x, .y = (int)apple_y };
 }
