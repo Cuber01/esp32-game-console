@@ -17,6 +17,7 @@ extern char Map[MAP_HEIGHT][MAP_WIDTH];
 void mapClear();
 void gameDraw();
 void mapSet(int8_t x, int8_t y, char value);
+char mapGetDefault(int8_t x, int8_t y, char defaultVal);
 char mapGet(int8_t x, int8_t y);
 bool IsInBounds(int8_t x, int8_t y);
 bool IsInBounds(Point p);

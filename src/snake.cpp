@@ -13,7 +13,6 @@ bool snakeCollision();
 
 void placeSnakeOnMap()
 {
-    // TODO: fix iterator for when head < tail
     for (size_t i = 0; i < SnakeParts.Size(); i++) {
         const Point& point = SnakeParts[i];
         if (!IsInBounds(point.x, point.y)) {
@@ -36,14 +35,17 @@ void snakeInit()
     SnakeParts.PushHead((Point){.x = 1, .y = 3});
 }
 
-void snakeMove(InputKeys direction, bool grow )
+void snakeMove(InputKeys direction, bool grow)
 {
     static InputKeys current_direction = INPUT_NONE;
 
-    Point& currentPosition = SnakeParts.GetHead();
-    Point nextPosition = currentPosition;
+    Point nextPosition = SnakeParts.GetHead();
 
-    if(direction == INPUT_NONE)
+    if     (direction == INPUT_NONE
+        || (direction == INPUT_RIGHT && current_direction == INPUT_LEFT)
+        || (direction == INPUT_LEFT && current_direction == INPUT_RIGHT)
+        || (direction == INPUT_FORWARD && current_direction == INPUT_BACKWARD)
+        || (direction == INPUT_BACKWARD && current_direction == INPUT_FORWARD))
     {
         direction = current_direction;
     }
@@ -66,7 +68,8 @@ void snakeMove(InputKeys direction, bool grow )
         break;
     };
 
-    if (current_direction != INPUT_NONE) {
+    if (direction != INPUT_NONE)
+    {
         if (snakeCollision()) {
             EndGame();
         }
@@ -77,13 +80,13 @@ void snakeMove(InputKeys direction, bool grow )
         {
             SnakeParts.PopTail();
         }
+
+        current_direction = direction;
     }
+}
 
+void snakeExecuteMove() {
 
-
-
-        
-    current_direction = direction;
 }
 
 bool snakeCollision()

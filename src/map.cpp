@@ -23,6 +23,13 @@ void mapSet(int8_t x, int8_t y, char value)
     Map[y][x] = value;
 }
 
+char mapGetDefault(int8_t x, int8_t y, char defaultVal) {
+    if (IsInBounds(x, y)) {
+        return Map[y][x];
+    }
+    return defaultVal;
+}
+
 char mapGet(int8_t x, int8_t y)
 {
     assert(IsInBounds(x, y));
