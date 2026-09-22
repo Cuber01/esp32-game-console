@@ -14,3 +14,16 @@ X fix issue where apple does not reappear
     X make it impossible for snake head to move into its neck itself
     ~ screen wrap
     - game over screen & restart
+
+Driver info:
+- we use 4-line SPI (hardwired by producer)
+
+4-line SPI pins used:
+CSX (CS): Chip selection signal
+WRX (SCL): Clock
+DCX (DC): Data is regarded as a command when WRX is low. Data is regarded as a parameter or data when WRX is high
+SDA (SDA): Serial input/output data
+
+WRX and DCX might need to be swapped, but it seems like a datasheet error that confused the two
+
+Transmission via 4-line serial interface: chapter 8.4 of datasheet

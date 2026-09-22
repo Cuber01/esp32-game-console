@@ -5,6 +5,8 @@
 
 
 void SPIHandler::Init() {
+    esp_err_t err = ESP_OK;
+
     // Set config for data command pin
     gpio_config_t ioConfig = {
         .pin_bit_mask = (1ULL << SCREEN_DC),
@@ -13,7 +15,8 @@ void SPIHandler::Init() {
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
-    gpio_config(&ioConfig);
+    err = gpio_config(&ioConfig);
+    assert(err == ESP_OK);
 
     // Configure SPI Bus (MOSI used for bidirectional SDA)
     spi_bus_config_t busConfig = {
@@ -25,38 +28,57 @@ void SPIHandler::Init() {
         .max_transfer_sz = 4096,
     };
     // SPI2_HOST is available for user in ESP32. SPI1_HOST isn't
-    spi_bus_initialize(SPI2_HOST, &busConfig, SPI_DMA_CH_AUTO);
+    err = spi_bus_initialize(SPI2_HOST, &busConfig, SPI_DMA_CH_AUTO);
+    assert(err == ESP_OK);
 
     // Configure Device with HALF-DUPLEX
     spi_device_interface_config_t deviceConfig = {
         .mode = 0,                          // SPI Mode
-        .clock_speed_hz = 10 * 1000 * 1000, // 10 MHz
+        .clock_speed_hz = 2 * 1000 * 1000, // 6.6 MHz
         .spics_io_num = SCREEN_CS,
-        .flags = SPI_DEVICE_HALFDUPLEX,      // Crucial for 1-wire bidirectional read
+        .flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_3WIRE,      // Crucial for 1-wire bidirectional read
         .queue_size = 7,
     };
 
-    spi_bus_add_device(SPI2_HOST, &deviceConfig, &spiHandle);
+    err = spi_bus_add_device(SPI2_HOST, &deviceConfig, &spiHandle);
+    assert(err == ESP_OK);
 }
 
-void SPIHandler::GpioWrite(uint8_t pin, const bool level) {
-    gpio_set_level(static_cast<gpio_num_t>(pin), level ? 1 : 0);
+esp_err_t SPIHandler::GpioWrite(uint8_t pin, const bool level) {
+    return gpio_set_level(static_cast<gpio_num_t>(pin), level ? 1 : 0);
 }
 
-void SPIHandler::Transmit(uint8_t *data, const size_t length) {
+esp_err_t SPIHandler::ReadCommand(uint8_t cmd, uint8_t *receiveBuffer,
+                                 size_t rxInformationBytes, size_t rxDummyBytes) {
+    // 1. Pull DC LOW for Command Phase
+    GpioWrite(SCREEN_DC, false);
+
+    spi_transaction_ext_t t = {};
+    t.base.flags = SPI_TRANS_VARIABLE_CMD; // Command
+    t.base.cmd = cmd;                      // The command byte (0x04)
+    t.command_bits = 8;                    // 8-bit command
+    t.dummy_bits = rxDummyBytes * 8;
+    t.base.rxlength = rxInformationBytes * 8;
+    t.base.rx_buffer = receiveBuffer;
+
+    // (SP-IDF automatically turns SDA into an input pin, and sends bytes
+    return spi_device_transmit(spiHandle, reinterpret_cast<spi_transaction_t *>(&t));
+}
+
+esp_err_t SPIHandler::Transmit(uint8_t *data, const size_t length) {
     spi_transaction_t t = {
         .length = length * 8, // Length is in bits
         .tx_buffer = data,
     };
 
-    spi_device_transmit(spiHandle, &t);
+    return spi_device_transmit(spiHandle, &t);
 }
 
-void SPIHandler::Receive(uint8_t *data, const size_t length) {
+esp_err_t SPIHandler::Receive(uint8_t *data, const size_t length) {
     spi_transaction_t t = {
         .rxlength = length * 8, // Length is in bits
         .rx_buffer = data,
     };
 
-    spi_device_transmit(spiHandle, &t); // IDF handles switching SDA to input automatically
+    return spi_device_transmit(spiHandle, &t); // IDF handles switching SDA to input automatically
 }
