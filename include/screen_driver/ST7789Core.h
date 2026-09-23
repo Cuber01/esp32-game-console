@@ -13,7 +13,13 @@ public:
     uint32_t ReadDisplayID();
     esp_err_t ReadCommand(uint8_t cmd, uint8_t *receiveBuffer, size_t rxInformationBytes, size_t rxDummyBytes);
 
-    esp_err_t WriteCommand(uint8_t cmd, const uint8_t *paramsBuffer, size_t paramBytes);
+    esp_err_t WriteCommand(uint8_t cmd, uint8_t *paramsBuffer, size_t paramBytes);
+
+    esp_err_t WritePixelData(uint16_t color, uint16_t amount);
+
+    esp_err_t SetRowsAddress(uint16_t y1, uint16_t y2);
+
+    esp_err_t SetColumnsAddress(uint8_t y1, uint8_t y2);
 
     ColorFormats ReadColorFormat();
 
