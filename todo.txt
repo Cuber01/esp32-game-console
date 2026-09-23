@@ -4,6 +4,7 @@ X check if snake-on-snake collision works
 X fix crash after a few minutes: memory corruption / stack overflow suspected: check cyclic buffer
 X fix issue where apple does not reappear
 - fix apples spawning on snake
+- do rendering on antoher thread or find other way to take input without it getting delayed by delay()
 - write driver
 - remove arduino dependencies
 - add sound
