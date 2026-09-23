@@ -48,37 +48,9 @@ esp_err_t SPIHandler::GpioWrite(uint8_t pin, const bool level) {
     return gpio_set_level(static_cast<gpio_num_t>(pin), level ? 1 : 0);
 }
 
-esp_err_t SPIHandler::ReadCommand(uint8_t cmd, uint8_t *receiveBuffer,
-                                 size_t rxInformationBytes, size_t rxDummyBytes) {
-    // 1. Pull DC LOW for Command Phase
-    GpioWrite(SCREEN_DC, false);
 
-    spi_transaction_ext_t t = {};
-    t.base.flags = SPI_TRANS_VARIABLE_CMD; // Command
-    t.base.cmd = cmd;                      // The command byte (0x04)
-    t.command_bits = 8;                    // 8-bit command
-    t.dummy_bits = rxDummyBytes * 8;
-    t.base.rxlength = rxInformationBytes * 8;
-    t.base.rx_buffer = receiveBuffer;
 
-    // (SP-IDF automatically turns SDA into an input pin, and sends bytes
-    return spi_device_transmit(spiHandle, reinterpret_cast<spi_transaction_t *>(&t));
+esp_err_t SPIHandler::Transmit(spi_transaction_t* transaction) {
+    return spi_device_transmit(spiHandle, transaction);
 }
 
-esp_err_t SPIHandler::Transmit(uint8_t *data, const size_t length) {
-    spi_transaction_t t = {
-        .length = length * 8, // Length is in bits
-        .tx_buffer = data,
-    };
-
-    return spi_device_transmit(spiHandle, &t);
-}
-
-esp_err_t SPIHandler::Receive(uint8_t *data, const size_t length) {
-    spi_transaction_t t = {
-        .rxlength = length * 8, // Length is in bits
-        .rx_buffer = data,
-    };
-
-    return spi_device_transmit(spiHandle, &t); // IDF handles switching SDA to input automatically
-}
