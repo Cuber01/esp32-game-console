@@ -5,12 +5,13 @@
 
 #include "graphics.h"
 #include "driver/spi_master.h"
-#include "driver/gpio.h"
 #include "screen_driver/Commands.h"
 #include "screen_driver/DisplayPixelFormat.h"
 
 void ST7789Core::Init(void) {
     spi.Init();
+    ESP_ERROR_CHECK(SetSleep(true));
+    ESP_ERROR_CHECK(TurnDisplay(true));
 }
 
 uint32_t ST7789Core::ReadDisplayID(void) {
@@ -97,7 +98,8 @@ esp_err_t ST7789Core::WriteCommand(const uint8_t cmd, uint8_t* paramsBuffer, con
 
 esp_err_t ST7789Core::WritePixelData(uint16_t color, uint16_t amount) {
     assert(amount > 0);
-    uint8_t writeBuffer[amount * 2];
+    spi.GpioWrite(SCREEN_CS, false);
+    uint8_t writeBuffer[amount * 2]; // TODO move this off the stack or else esp32 might overflow
     // TODO buffer the two bytes set here?
     for (uint16_t i = 0; i < amount*2; i++) {
         if (i % 2 == 0) {
@@ -108,9 +110,23 @@ esp_err_t ST7789Core::WritePixelData(uint16_t color, uint16_t amount) {
     }
 
     esp_err_t err = WriteCommand(RAMWR, writeBuffer,amount*2);
+    spi.GpioWrite(SCREEN_CS, true);
     return err;
 }
 
+esp_err_t ST7789Core::SetSleep(bool awake) {
+    spi.GpioWrite(SCREEN_CS, false);
+    esp_err_t err = WriteCommand(awake ? SLPOUT : SLPIN, nullptr, 0);
+    spi.GpioWrite(SCREEN_CS, true);
+    return err;
+}
+
+esp_err_t ST7789Core::TurnDisplay(bool on) {
+    spi.GpioWrite(SCREEN_CS, false);
+    esp_err_t err = WriteCommand(on ? DISPON : DISPOFF, nullptr, 0);
+    spi.GpioWrite(SCREEN_CS, true);
+    return err;
+}
 
 esp_err_t ST7789Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
     assert(x1 <= x2 && x2 <= SCREEN_WIDTH-1);
@@ -122,7 +138,7 @@ esp_err_t ST7789Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
         0,
         x2
     };
-    esp_err_t e = WriteCommand(COLMOD, writeBuffer, 4);
+    esp_err_t e = WriteCommand(CASET, writeBuffer, 4);
     spi.GpioWrite(SCREEN_CS, true);
     return e;
 }
@@ -137,7 +153,7 @@ esp_err_t ST7789Core::SetRowsAddress(uint16_t y1, uint16_t y2) {
         static_cast<uint8_t>(y2 >> 8),
         static_cast<uint8_t>(y2 & 0x00FF)
     };
-    esp_err_t e = WriteCommand(COLMOD, writeBuffer, 4);
+    esp_err_t e = WriteCommand(RASET, writeBuffer, 4);
     spi.GpioWrite(SCREEN_CS, true);
     return e;
 }

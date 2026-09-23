@@ -1,7 +1,6 @@
 #ifndef GAME_CONSOLE_SPI_HANDLER_H
 #define GAME_CONSOLE_SPI_HANDLER_H
 
-#include <cstdint>
 #include "driver/spi_master.h"
 
 class SPIHandler {

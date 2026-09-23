@@ -11,20 +11,19 @@ void setup() {
     delay(100);
 
     driver->Init();
-    delay(10);
+    delay(100);
     ColorFormats newFormats = {
         .RGBInterfaceFormat = UNSET,
         .ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL
     };
     driver->SetColorFormat(&newFormats);
-    delay(1);
+    delay(100);
     ColorFormats formats = driver->ReadColorFormat();
     Serial.print(formats.RGBInterfaceFormat);
     Serial.print(formats.ControlInterfaceFormat);
-
-
-
-
+    ESP_ERROR_CHECK(driver->SetColumnsAddress(25,29));
+    ESP_ERROR_CHECK(driver->SetRowsAddress(25,29));
+    ESP_ERROR_CHECK(driver->WritePixelData(GREEN, 25));
 
     //gameInit();
 }
@@ -33,8 +32,6 @@ void loop() {
     // if (IsRunning()) {
     //     gameLoop();
     // }
-    ESP_ERROR_CHECK(driver->SetColumnsAddress(25,30));
-    ESP_ERROR_CHECK(driver->SetRowsAddress(25,30));
-    ESP_ERROR_CHECK(driver->WritePixelData(GREEN, 25));
+
 }
 

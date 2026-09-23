@@ -17,6 +17,10 @@ public:
 
     esp_err_t WritePixelData(uint16_t color, uint16_t amount);
 
+    esp_err_t SetSleep(bool awake);
+
+    esp_err_t TurnDisplay(bool on);
+
     esp_err_t SetRowsAddress(uint16_t y1, uint16_t y2);
 
     esp_err_t SetColumnsAddress(uint8_t y1, uint8_t y2);
