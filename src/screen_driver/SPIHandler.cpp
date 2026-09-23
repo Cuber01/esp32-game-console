@@ -16,7 +16,7 @@ void SPIHandler::Init() {
         .intr_type = GPIO_INTR_DISABLE,
     };
     err = gpio_config(&ioConfig);
-    assert(err == ESP_OK);
+    ESP_ERROR_CHECK(err);
 
     // Configure SPI Bus (MOSI used for bidirectional SDA)
     spi_bus_config_t busConfig = {
@@ -29,7 +29,7 @@ void SPIHandler::Init() {
     };
     // SPI2_HOST is available for user in ESP32. SPI1_HOST isn't
     err = spi_bus_initialize(SPI2_HOST, &busConfig, SPI_DMA_CH_AUTO);
-    assert(err == ESP_OK);
+    ESP_ERROR_CHECK(err);
 
     // Configure Device with HALF-DUPLEX
     spi_device_interface_config_t deviceConfig = {
@@ -41,14 +41,12 @@ void SPIHandler::Init() {
     };
 
     err = spi_bus_add_device(SPI2_HOST, &deviceConfig, &spiHandle);
-    assert(err == ESP_OK);
+    ESP_ERROR_CHECK(err);
 }
 
 esp_err_t SPIHandler::GpioWrite(uint8_t pin, const bool level) {
     return gpio_set_level(static_cast<gpio_num_t>(pin), level ? 1 : 0);
 }
-
-
 
 esp_err_t SPIHandler::Transmit(spi_transaction_t* transaction) {
     return spi_device_transmit(spiHandle, transaction);

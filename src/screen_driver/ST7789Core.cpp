@@ -1,6 +1,8 @@
 #include "cstdint"
 #include "screen_driver/ST7789Core.h"
 
+#include <HardwareSerial.h>
+
 #include "graphics.h"
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
@@ -13,10 +15,9 @@ void ST7789Core::Init(void) {
 
 uint32_t ST7789Core::ReadDisplayID(void) {
     uint8_t readBuffer[3] = {0};
+
     spi.GpioWrite(SCREEN_CS, false);
-
     ReadCommand(RDDID, readBuffer, 3, 1);
-
     spi.GpioWrite(SCREEN_CS, true);
 
     uint8_t id1 = readBuffer[0];
@@ -26,6 +27,23 @@ uint32_t ST7789Core::ReadDisplayID(void) {
     return (static_cast<uint32_t>(id1) << 16)
            |(static_cast<uint32_t>(id2) << 8)
            |static_cast<uint32_t>(id3);
+}
+
+ColorFormats ST7789Core::ReadColorFormat() {
+    uint8_t readBuffer[1] = {0};
+
+    spi.GpioWrite(SCREEN_CS, false);
+    ReadCommand(RDDCOLMOD, readBuffer, 1, 1);
+    spi.GpioWrite(SCREEN_CS, true);
+
+    uint8_t highNibble = (*readBuffer >> 4);
+    uint8_t lowNibble =  ((*readBuffer) & 0x0F);
+
+    ColorFormats rv = {};
+    rv.RGBInterfaceFormat = static_cast<DisplayPixelFormat>(highNibble);
+    rv.ControlInterfaceFormat = static_cast<DisplayPixelFormat>(lowNibble);
+
+    return rv;
 }
 
 esp_err_t ST7789Core::ReadCommand(uint8_t cmd, uint8_t* receiveBuffer,
@@ -47,45 +65,44 @@ esp_err_t ST7789Core::ReadCommand(uint8_t cmd, uint8_t* receiveBuffer,
 esp_err_t ST7789Core::WriteCommand(const uint8_t cmd, const uint8_t* paramsBuffer, const size_t paramBytes) {
     // TODO I think this can be declared as a single transaction somehow
     esp_err_t err = ESP_OK;
-    spi.GpioWrite(SCREEN_DC, false); // Command
 
-    spi_transaction_ext_t commandTrans = {};
-    commandTrans.base.tx_buffer = &cmd;
-    commandTrans.base.length = 8;
+    // Send command
+    spi.GpioWrite(SCREEN_DC, false);
 
-    err = spi.Transmit(reinterpret_cast<spi_transaction_t *>(&commandTrans));
+    spi_transaction_t commandTrans = {};
+    commandTrans.flags = SPI_TRANS_USE_TXDATA; // Use internal buffer instead of pointer to stack
+    commandTrans.tx_data[0] = cmd;
+    commandTrans.length = 8;
+
+    err = spi.Transmit(&commandTrans);
     if (err != ESP_OK) {
         return err;
     }
 
-    spi.GpioWrite(SCREEN_DC, true); // Params
 
-    spi_transaction_ext_t paramsTrans = {};
-    paramsTrans.base.tx_buffer = paramsBuffer;
-    paramsTrans.base.length = paramBytes * 8;
+    if (paramsBuffer != nullptr && paramBytes > 0) {
+        spi.GpioWrite(SCREEN_DC, true); // Send Parameters
 
-    err = spi.Transmit(reinterpret_cast<spi_transaction_t *>(&paramsTrans));
-    return err;
+        spi_transaction_t paramsTrans = {};
+        paramsTrans.tx_buffer = paramsBuffer;
+        paramsTrans.length = paramBytes * 8;
+
+        err = spi.Transmit(&paramsTrans);
+        if (err != ESP_OK) {
+            return err;
+        }
+    }
+
+    return ESP_OK;
 }
 
-ColorFormats ST7789Core::ReadColorFormat() {
-    uint8_t* receiveBuffer = nullptr;
 
-    ReadCommand(RDDCOLMOD, receiveBuffer, 1, 1);
-
-    uint8_t highNibble = (*receiveBuffer >> 4);
-    uint8_t lowNibble =  ((*receiveBuffer) & 0x0F);
-
-    ColorFormats rv = {};
-    rv.RGBInterfaceFormat = static_cast<DisplayPixelFormat>(highNibble);
-    rv.ColorInterfaceFormat = static_cast<DisplayPixelFormat>(lowNibble);
-
-    return rv;
-}
 
 esp_err_t ST7789Core::SetColorFormat(ColorFormats* config) {
     spi.GpioWrite(SCREEN_CS, false);
-    esp_err_t e = WriteCommand(COLMOD, reinterpret_cast<const uint8_t*>(config), 1);
+    uint8_t writeBuffer = (config->RGBInterfaceFormat << 4) | config->ControlInterfaceFormat;
+    esp_err_t e = WriteCommand(COLMOD, &writeBuffer, 1);
     spi.GpioWrite(SCREEN_CS, true);
-    assert(e == ESP_OK);
+    ESP_ERROR_CHECK(e);
+    return e;
 }
