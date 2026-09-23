@@ -1,5 +1,5 @@
-#ifndef FIXED_LIST_H
-#define FIXED_LIST_H
+#ifndef GAME_CONSOLE_FIXED_LIST_H
+#define GAME_CONSOLE_FIXED_LIST_H
 
 #include <array>
 #include <cassert>
@@ -103,4 +103,4 @@ public:
     }
 };
 
-#endif // FIXED_LIST_H
+#endif // GAME_CONSOLE_FIXED_LIST_H

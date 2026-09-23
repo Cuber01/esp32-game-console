@@ -1,5 +1,5 @@
-#ifndef __MAP_H
-#define __MAP_H
+#ifndef GAME_CONSOLE_MAP_H
+#define GAME_CONSOLE_MAP_H
 
 #include "graphics.h"
 #include "game.h"
@@ -22,4 +22,4 @@ char mapGet(int8_t x, int8_t y);
 bool IsInBounds(int8_t x, int8_t y);
 bool IsInBounds(Point p);
 
-#endif
+#endif // GAME_CONSOLE_MAP_H

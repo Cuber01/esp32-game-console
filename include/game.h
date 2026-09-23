@@ -1,5 +1,5 @@
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef GAME_CONSOLE_GAME_H
+#define GAME_CONSOLE_GAME_H
 
 typedef struct
 {
@@ -12,4 +12,4 @@ void gameInit();
 void EndGame();
 bool IsRunning();
 
-#endif
+#endif // GAME_CONSOLE_GAME_H

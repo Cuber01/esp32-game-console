@@ -27,3 +27,5 @@ SDA (SDA): Serial input/output data
 WRX and DCX might need to be swapped, but it seems like a datasheet error that confused the two
 
 Transmission via 4-line serial interface: chapter 8.4 of datasheet
+
+COLMOD, CASET, RASET, RAMWR, RAMRD

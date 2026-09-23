@@ -1,5 +1,5 @@
-#ifndef ESP32_GAME_CONSOLE_FIXED_CIRCULAR_QUEUE_H
-#define ESP32_GAME_CONSOLE_FIXED_CIRCULAR_QUEUE_H
+#ifndef GAME_CONSOLE_FIXED_CIRCULAR_QUEUE_H
+#define GAME_CONSOLE_FIXED_CIRCULAR_QUEUE_H
 #include <array>
 
 template <typename T, std::size_t N>
@@ -57,4 +57,4 @@ public:
     }
 };
 
-#endif
+#endif // GAME_CONSOLE_FIXED_CIRCULAR_QUEUE_H

@@ -1,5 +1,5 @@
-#ifndef SNAKE_H
-#define SNAKE_H
+#ifndef GAME_CONSOLE_SNAKE_H
+#define GAME_CONSOLE_SNAKE_H
 
 #include "game.h"
 #include "map.h"
@@ -29,4 +29,4 @@ void snakeMove(InputKeys direction, bool grow);
 void placeSnakeOnMap();
 
 
-#endif
+#endif // GAME_CONSOLE_SNAKE_H

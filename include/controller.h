@@ -1,5 +1,5 @@
-#ifndef __KEYBOARD_H
-#define __KEYBOARD_H
+#ifndef GAME_CONSOLE_CONTROLLER_H
+#define GAME_CONSOLE_CONTROLLER_H
 
 typedef enum
 {
@@ -14,4 +14,4 @@ typedef enum
 void controllerInit();
 InputKeys controllerGetInput();
 
-#endif
+#endif // GAME_CONSOLE_CONTROLLER_H

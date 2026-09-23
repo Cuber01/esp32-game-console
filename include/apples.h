@@ -1,5 +1,5 @@
-#ifndef __APPLES_H
-#define __APPLES_H
+#ifndef GAME_CONSOLE_APPLES_H
+#define GAME_CONSOLE_APPLES_H
 
 #include "game.h"
 
@@ -11,4 +11,4 @@ Point calculateApplePos(void);
 void createApple(Point applePos);
 void appleRemove();
 
-#endif
+#endif // GAME_CONSOLE_APPLES_H
