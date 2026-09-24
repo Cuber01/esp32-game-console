@@ -22,6 +22,8 @@ public:
 
     esp_err_t WritePixelData(uint16_t color, int32_t amount);
 
+    esp_err_t ReadPixelData(uint8_t *receiveBuffer, int32_t amount);
+
     esp_err_t transmitCommand(Commands cmd);
 
     esp_err_t transmitParameters(const uint8_t *paramsBuffer, size_t paramBytes);

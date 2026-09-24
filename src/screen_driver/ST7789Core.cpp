@@ -7,6 +7,7 @@
 #include "driver/spi_master.h"
 #include "screen_driver/Commands.h"
 #include "screen_driver/DisplayPixelFormat.h"
+#include "screen_driver/Colors.h"
 
 void ST7789Core::Init(void) {
     spi.Init();
@@ -37,6 +38,14 @@ void ST7789Core::Init(void) {
     transmitCommand(NORON);
     delay(10);
     ESP_ERROR_CHECK(TurnDisplay(true));
+
+    ESP_ERROR_CHECK(WritePixelData(GREEN, 50));
+    uint8_t buffer[150] = {0};
+    ESP_ERROR_CHECK(ReadPixelData(buffer, 50));
+    for (int i = 0; i < 150; i++) {
+        Serial.print(buffer[i]);
+    }
+
     spi.GpioWrite(SCREEN_CS, true);
 }
 
@@ -101,6 +110,8 @@ esp_err_t ST7789Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, co
     return spi.Transmit(&t);
 }
 
+// Writes pixel data in 2 byte format!!!
+// [8bit data] + [8bit data]
 esp_err_t ST7789Core::WritePixelData(uint16_t color, int32_t amount) {
     assert(amount > 0);
     //spi.GpioWrite(SCREEN_CS, false);
@@ -114,11 +125,11 @@ esp_err_t ST7789Core::WritePixelData(uint16_t color, int32_t amount) {
 
         for (uint32_t i = 0; i < bytesToSend; i++) {
             if (i % 2 == 0) {
-                //writeBuffer[i] = firstByte;
-                writeBuffer[i] = static_cast<uint8_t>(esp_random());
+                writeBuffer[i] = firstByte;
+                //writeBuffer[i] = static_cast<uint8_t>(esp_random());
             } else {
-                //writeBuffer[i] = secondByte;
-                writeBuffer[i] = static_cast<uint8_t>(esp_random());
+                writeBuffer[i] = secondByte;
+                //writeBuffer[i] = static_cast<uint8_t>(esp_random());
             }
         }
 
@@ -131,6 +142,15 @@ esp_err_t ST7789Core::WritePixelData(uint16_t color, int32_t amount) {
 
     return ESP_OK;
 }
+
+// Reads pixel data in 3-byte format!!!
+// [6bit data + 00] + [6bit data + 00] + [6bit data + 00]
+esp_err_t ST7789Core::ReadPixelData(uint8_t* receiveBuffer, int32_t amount) {
+    assert(amount > 0);
+    return ReadCommand(RAMRD, receiveBuffer, amount*3, 0);
+}
+
+
 
 esp_err_t ST7789Core::transmitCommand(Commands cmd) {
     spi.GpioWrite(SCREEN_DC, false);
