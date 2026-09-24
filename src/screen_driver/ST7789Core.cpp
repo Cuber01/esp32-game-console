@@ -10,16 +10,42 @@
 
 void ST7789Core::Init(void) {
     spi.Init();
-    ESP_ERROR_CHECK(SetSleep(true));
+    spi.GpioWrite(SCREEN_CS, false);
+    delay(100);
+    transmitSimpleCommand(SWRESET);
+    delay(150);
+    ESP_ERROR_CHECK(SetSleep(false));
+    delay(120);
+    ColorFormats newFormats = {
+        .RGBInterfaceFormat = UNSET,
+        .ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL
+    };
+    SetColorFormat(&newFormats);
+    delay(10);
+    ColorFormats formats = ReadColorFormat();
+    Serial.print(formats.RGBInterfaceFormat);
+    Serial.print(formats.ControlInterfaceFormat);
+    delay(10);
+    uint8_t buf[1] = {0x08};
+    WriteCommand(MADCTL, buf, 1);
+    delay(10);
+    ESP_ERROR_CHECK(SetColumnsAddress(0,SCREEN_WIDTH-1));
+    ESP_ERROR_CHECK(SetRowsAddress(0,SCREEN_HEIGHT-1));
+    delay(10);
+    transmitSimpleCommand(INVON);
+    delay(10);
+    transmitSimpleCommand(NORON);
+    delay(10);
     ESP_ERROR_CHECK(TurnDisplay(true));
+    spi.GpioWrite(SCREEN_CS, true);
 }
 
 uint32_t ST7789Core::ReadDisplayID(void) {
     uint8_t readBuffer[3] = {0};
 
-    spi.GpioWrite(SCREEN_CS, false);
+    //spi.GpioWrite(SCREEN_CS, false);
     ReadCommand(RDDID, readBuffer, 3, 1);
-    spi.GpioWrite(SCREEN_CS, true);
+    //spi.GpioWrite(SCREEN_CS, true);
 
     uint8_t id1 = readBuffer[0];
     uint8_t id2 = readBuffer[1];
@@ -33,9 +59,9 @@ uint32_t ST7789Core::ReadDisplayID(void) {
 ColorFormats ST7789Core::ReadColorFormat() {
     uint8_t readBuffer[1] = {0};
 
-    spi.GpioWrite(SCREEN_CS, false);
+    //spi.GpioWrite(SCREEN_CS, false);
     ReadCommand(RDDCOLMOD, readBuffer, 1, 1);
-    spi.GpioWrite(SCREEN_CS, true);
+    //spi.GpioWrite(SCREEN_CS, true);
 
     uint8_t highNibble = (*readBuffer >> 4);
     uint8_t lowNibble =  ((*readBuffer) & 0x0F);
@@ -96,41 +122,45 @@ esp_err_t ST7789Core::WriteCommand(const uint8_t cmd, uint8_t* paramsBuffer, con
     return ESP_OK;
 }
 
-esp_err_t ST7789Core::WritePixelData(uint16_t color, uint16_t amount) {
+esp_err_t ST7789Core::WritePixelData(uint16_t color, uint32_t amount) {
     assert(amount > 0);
-    spi.GpioWrite(SCREEN_CS, false);
-    uint8_t writeBuffer[amount * 2]; // TODO move this off the stack or else esp32 might overflow
+    //spi.GpioWrite(SCREEN_CS, false);
+    static uint8_t writeBuffer[] = {0}; // TODO move this off the stack or else esp32 might overflow
+    //SCREEN_WIDTH*SCREEN_HEIGHT*2
     // TODO buffer the two bytes set here?
-    for (uint16_t i = 0; i < amount*2; i++) {
+    for (uint32_t i = 0; i < amount*2; i++) {
         if (i % 2 == 0) {
-            writeBuffer[i] = static_cast<uint8_t>(color >> 8);
+            //writeBuffer[i] = static_cast<uint8_t>(color >> 8);
+            writeBuffer[i] = static_cast<uint8_t>(esp_random());
         } else {
-            writeBuffer[i] = static_cast<uint8_t>(color & 0x00FF);
+            //writeBuffer[i] = static_cast<uint8_t>(color & 0x00FF);
+            writeBuffer[i] = static_cast<uint8_t>(esp_random());
         }
     }
 
     esp_err_t err = WriteCommand(RAMWR, writeBuffer,amount*2);
-    spi.GpioWrite(SCREEN_CS, true);
+    //spi.GpioWrite(SCREEN_CS, true);
     return err;
 }
 
-esp_err_t ST7789Core::SetSleep(bool awake) {
-    spi.GpioWrite(SCREEN_CS, false);
-    esp_err_t err = WriteCommand(awake ? SLPOUT : SLPIN, nullptr, 0);
-    spi.GpioWrite(SCREEN_CS, true);
+esp_err_t ST7789Core::transmitSimpleCommand(Commands cmd) {
+    //spi.GpioWrite(SCREEN_CS, false);
+    esp_err_t err = WriteCommand(cmd, nullptr, 0);
+    //spi.GpioWrite(SCREEN_CS, true);
     return err;
+}
+
+esp_err_t ST7789Core::SetSleep(bool sleep) {
+    return transmitSimpleCommand(sleep ? SLPIN : SLPOUT);
 }
 
 esp_err_t ST7789Core::TurnDisplay(bool on) {
-    spi.GpioWrite(SCREEN_CS, false);
-    esp_err_t err = WriteCommand(on ? DISPON : DISPOFF, nullptr, 0);
-    spi.GpioWrite(SCREEN_CS, true);
-    return err;
+    return transmitSimpleCommand(on ? DISPON : DISPOFF);
 }
 
 esp_err_t ST7789Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
     assert(x1 <= x2 && x2 <= SCREEN_WIDTH-1);
-    spi.GpioWrite(SCREEN_CS, false);
+    //spi.GpioWrite(SCREEN_CS, false);
     // 1st and 3rd parameter should be empty because SCREEN WIDTH is small     // TODO support bigger?
     uint8_t writeBuffer[4] = {
         0,
@@ -139,14 +169,14 @@ esp_err_t ST7789Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
         x2
     };
     esp_err_t e = WriteCommand(CASET, writeBuffer, 4);
-    spi.GpioWrite(SCREEN_CS, true);
+    //spi.GpioWrite(SCREEN_CS, true);
     return e;
 }
 
 esp_err_t ST7789Core::SetRowsAddress(uint16_t y1, uint16_t y2) {
     assert(y1 <= y2 && y2 <= SCREEN_HEIGHT-1);
 
-    spi.GpioWrite(SCREEN_CS, false);
+    //spi.GpioWrite(SCREEN_CS, false);
     uint8_t writeBuffer[4] = {
         static_cast<uint8_t>(y1 >> 8),
         static_cast<uint8_t>(y1 & 0x00FF),
@@ -154,15 +184,15 @@ esp_err_t ST7789Core::SetRowsAddress(uint16_t y1, uint16_t y2) {
         static_cast<uint8_t>(y2 & 0x00FF)
     };
     esp_err_t e = WriteCommand(RASET, writeBuffer, 4);
-    spi.GpioWrite(SCREEN_CS, true);
+    //spi.GpioWrite(SCREEN_CS, true);
     return e;
 }
 
 esp_err_t ST7789Core::SetColorFormat(ColorFormats* config) {
-    spi.GpioWrite(SCREEN_CS, false);
+    //spi.GpioWrite(SCREEN_CS, false);
     uint8_t writeBuffer = (config->RGBInterfaceFormat << 4) | config->ControlInterfaceFormat;
     esp_err_t e = WriteCommand(COLMOD, &writeBuffer, 1);
-    spi.GpioWrite(SCREEN_CS, true);
+    //spi.GpioWrite(SCREEN_CS, true);
     ESP_ERROR_CHECK(e);
     return e;
 }

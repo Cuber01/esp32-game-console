@@ -1,6 +1,7 @@
 
 #ifndef GAME_CONSOLE_ST7789_CORE_H
 #define GAME_CONSOLE_ST7789_CORE_H
+#include "Commands.h"
 #include "DisplayPixelFormat.h"
 #include "SPIHandler.h"
 
@@ -15,9 +16,13 @@ public:
 
     esp_err_t WriteCommand(uint8_t cmd, uint8_t *paramsBuffer, size_t paramBytes);
 
-    esp_err_t WritePixelData(uint16_t color, uint16_t amount);
+    esp_err_t WritePixelData(uint16_t color, uint32_t amount);
+
+    esp_err_t transmitSimpleCommand(Commands cmd);
 
     esp_err_t SetSleep(bool awake);
+
+    esp_err_t SoftwareReset();
 
     esp_err_t TurnDisplay(bool on);
 
