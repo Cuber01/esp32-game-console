@@ -12,7 +12,7 @@ void ST7789Core::Init(void) {
     spi.Init();
     spi.GpioWrite(SCREEN_CS, false);
     delay(100);
-    transmitSimpleCommand(SWRESET);
+    ESP_ERROR_CHECK(transmitCommand(SWRESET));
     delay(150);
     ESP_ERROR_CHECK(SetSleep(false));
     delay(120);
@@ -20,7 +20,7 @@ void ST7789Core::Init(void) {
         .RGBInterfaceFormat = UNSET,
         .ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL
     };
-    SetColorFormat(&newFormats);
+    ESP_ERROR_CHECK(SetColorFormat(&newFormats));
     delay(10);
     ColorFormats formats = ReadColorFormat();
     Serial.print(formats.RGBInterfaceFormat);
@@ -32,9 +32,9 @@ void ST7789Core::Init(void) {
     ESP_ERROR_CHECK(SetColumnsAddress(0,SCREEN_WIDTH-1));
     ESP_ERROR_CHECK(SetRowsAddress(0,SCREEN_HEIGHT-1));
     delay(10);
-    transmitSimpleCommand(INVON);
+    transmitCommand(INVON);
     delay(10);
-    transmitSimpleCommand(NORON);
+    transmitCommand(NORON);
     delay(10);
     ESP_ERROR_CHECK(TurnDisplay(true));
     spi.GpioWrite(SCREEN_CS, true);
@@ -60,7 +60,7 @@ ColorFormats ST7789Core::ReadColorFormat() {
     uint8_t readBuffer[1] = {0};
 
     //spi.GpioWrite(SCREEN_CS, false);
-    ReadCommand(RDDCOLMOD, readBuffer, 1, 1);
+    ESP_ERROR_CHECK(ReadCommand(RDDCOLMOD, readBuffer, 1, 1));
     //spi.GpioWrite(SCREEN_CS, true);
 
     uint8_t highNibble = (*readBuffer >> 4);
@@ -89,11 +89,50 @@ esp_err_t ST7789Core::ReadCommand(uint8_t cmd, uint8_t* receiveBuffer,
     return spi.Transmit(reinterpret_cast<spi_transaction_t *>(&t));
 }
 
-esp_err_t ST7789Core::WriteCommand(const uint8_t cmd, uint8_t* paramsBuffer, const size_t paramBytes) {
-    // TODO I think this can be declared as a single transaction somehow
-    esp_err_t err = ESP_OK;
+esp_err_t ST7789Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, const size_t paramBytes) {
+    assert(paramsBuffer != nullptr && paramBytes > 0);
 
-    // Send command
+    spi_transaction_t t = {};
+
+    t.cmd = cmd;
+    t.length = paramBytes * 8;
+    setupTxBuffer(&t, paramsBuffer, paramBytes);
+
+    return spi.Transmit(&t);
+}
+
+esp_err_t ST7789Core::WritePixelData(uint16_t color, int32_t amount) {
+    assert(amount > 0);
+    //spi.GpioWrite(SCREEN_CS, false);
+
+    transmitCommand(RAMWR);
+
+    uint8_t firstByte = static_cast<uint8_t>(color >> 8);
+    uint8_t secondByte = static_cast<uint8_t>(color & 0x00FF);
+    while (amount > 0) {
+        uint32_t bytesToSend = WriteBufferSize > amount*2 ? amount*2 : WriteBufferSize;
+
+        for (uint32_t i = 0; i < bytesToSend; i++) {
+            if (i % 2 == 0) {
+                //writeBuffer[i] = firstByte;
+                writeBuffer[i] = static_cast<uint8_t>(esp_random());
+            } else {
+                //writeBuffer[i] = secondByte;
+                writeBuffer[i] = static_cast<uint8_t>(esp_random());
+            }
+        }
+
+        const esp_err_t err = transmitParameters(writeBuffer, bytesToSend);
+        if (err != ESP_OK) {
+            return err;
+        }
+        amount -= WriteBufferSize;
+    }
+
+    return ESP_OK;
+}
+
+esp_err_t ST7789Core::transmitCommand(Commands cmd) {
     spi.GpioWrite(SCREEN_DC, false);
 
     spi_transaction_t commandTrans = {};
@@ -101,61 +140,40 @@ esp_err_t ST7789Core::WriteCommand(const uint8_t cmd, uint8_t* paramsBuffer, con
     commandTrans.tx_data[0] = cmd;
     commandTrans.length = 8;
 
-    err = spi.Transmit(&commandTrans);
-    if (err != ESP_OK) {
-        return err;
-    }
-
-    if (paramsBuffer != nullptr && paramBytes > 0) {
-        spi.GpioWrite(SCREEN_DC, true); // Send Parameters
-
-        spi_transaction_t paramsTrans = {};
-        paramsTrans.tx_buffer = paramsBuffer;
-        paramsTrans.length = paramBytes * 8;
-
-        err = spi.Transmit(&paramsTrans);
-        if (err != ESP_OK) {
-            return err;
-        }
-    }
-
-    return ESP_OK;
-}
-
-esp_err_t ST7789Core::WritePixelData(uint16_t color, uint32_t amount) {
-    assert(amount > 0);
-    //spi.GpioWrite(SCREEN_CS, false);
-    static uint8_t writeBuffer[] = {0}; // TODO move this off the stack or else esp32 might overflow
-    //SCREEN_WIDTH*SCREEN_HEIGHT*2
-    // TODO buffer the two bytes set here?
-    for (uint32_t i = 0; i < amount*2; i++) {
-        if (i % 2 == 0) {
-            //writeBuffer[i] = static_cast<uint8_t>(color >> 8);
-            writeBuffer[i] = static_cast<uint8_t>(esp_random());
-        } else {
-            //writeBuffer[i] = static_cast<uint8_t>(color & 0x00FF);
-            writeBuffer[i] = static_cast<uint8_t>(esp_random());
-        }
-    }
-
-    esp_err_t err = WriteCommand(RAMWR, writeBuffer,amount*2);
-    //spi.GpioWrite(SCREEN_CS, true);
+    esp_err_t err = spi.Transmit(&commandTrans);
     return err;
 }
 
-esp_err_t ST7789Core::transmitSimpleCommand(Commands cmd) {
-    //spi.GpioWrite(SCREEN_CS, false);
-    esp_err_t err = WriteCommand(cmd, nullptr, 0);
-    //spi.GpioWrite(SCREEN_CS, true);
+esp_err_t ST7789Core::transmitParameters(const uint8_t* paramsBuffer, const size_t paramBytes) {
+    spi.GpioWrite(SCREEN_DC, true); // Send Parameters
+
+    spi_transaction_t paramsTrans = {};
+    setupTxBuffer(&paramsTrans, paramsBuffer, paramBytes);
+    paramsTrans.length = paramBytes * 8;
+
+    esp_err_t err = spi.Transmit(&paramsTrans);
     return err;
+}
+
+void ST7789Core::setupTxBuffer(spi_transaction_t* trans, const uint8_t* paramsBuffer, const size_t paramBytes) {
+    // Use internal buffer for small parameter sets (<= 4 bytes) to avoid DMA alignment issues
+    if (paramBytes <= 4) {
+        trans->flags = SPI_TRANS_USE_TXDATA;
+        for (size_t i = 0; i < paramBytes; i++) {
+            trans->tx_data[i] = paramsBuffer[i];
+        }
+    } else {
+        trans->tx_buffer = paramsBuffer;
+    }
+    trans->length = paramBytes * 8;
 }
 
 esp_err_t ST7789Core::SetSleep(bool sleep) {
-    return transmitSimpleCommand(sleep ? SLPIN : SLPOUT);
+    return transmitCommand(sleep ? SLPIN : SLPOUT);
 }
 
 esp_err_t ST7789Core::TurnDisplay(bool on) {
-    return transmitSimpleCommand(on ? DISPON : DISPOFF);
+    return transmitCommand(on ? DISPON : DISPOFF);
 }
 
 esp_err_t ST7789Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
