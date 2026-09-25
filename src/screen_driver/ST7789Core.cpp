@@ -11,33 +11,49 @@
 
 void ST7789Core::Init(void) {
     spi.Init();
+
+    spi.GpioWrite(SCREEN_RST, false);
+    delay(1000);
+    spi.GpioWrite(SCREEN_RST, true);
+
+    delay(500);
     spi.GpioWrite(SCREEN_CS, false);
-    delay(100);
+    delay(200);
+
     ESP_ERROR_CHECK(transmitCommand(SWRESET));
-    delay(150);
+    delay(200);
     ESP_ERROR_CHECK(SetSleep(false));
-    delay(120);
-    ColorFormats newFormats = {
-        .RGBInterfaceFormat = UNSET,
-        .ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL
-    };
-    ESP_ERROR_CHECK(SetColorFormat(&newFormats));
-    delay(10);
-    ColorFormats formats = ReadColorFormat();
-    Serial.print(formats.RGBInterfaceFormat);
-    Serial.print(formats.ControlInterfaceFormat);
-    delay(10);
-    uint8_t buf[1] = {0x08};
-    WriteCommand(MADCTL, buf, 1);
-    delay(10);
-    ESP_ERROR_CHECK(SetColumnsAddress(0,SCREEN_WIDTH-1));
-    ESP_ERROR_CHECK(SetRowsAddress(0,SCREEN_HEIGHT-1));
-    delay(10);
+    delay(200);
+
+    uint8_t data=0x55;
+    esp_err_t e = WriteCommand(COLMOD, &data, 1);
+    delay(200);
+
+    // ColorFormats newFormats = {
+    //     .RGBInterfaceFormat = UNSET,
+    //     .ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL
+    // };
+    // ESP_ERROR_CHECK(SetColorFormat(&newFormats));
+    // delay(200);
+    // ColorFormats formats = ReadColorFormat();
+    // Serial.print(formats.RGBInterfaceFormat);
+    // Serial.print(formats.ControlInterfaceFormat);
+    // delay(200);
+    // uint8_t buf[1] = {0x08};
+    // WriteCommand(MADCTL, buf, 1);
+    // delay(200);
+    // ESP_ERROR_CHECK(SetColumnsAddress(0,SCREEN_WIDTH-1));
+    // delay(200);
+    // ESP_ERROR_CHECK(SetRowsAddress(0,SCREEN_HEIGHT-1));
+
+
+    delay(200);
     transmitCommand(INVON);
-    delay(10);
+    delay(200);
     transmitCommand(NORON);
-    delay(10);
+    delay(200);
     ESP_ERROR_CHECK(TurnDisplay(true));
+    delay(200);
 
     ESP_ERROR_CHECK(WritePixelData(GREEN, 50));
     uint8_t buffer[150] = {0};
@@ -45,6 +61,8 @@ void ST7789Core::Init(void) {
     for (int i = 0; i < 150; i++) {
         Serial.print(buffer[i]);
     }
+
+    delay(200);
 
     spi.GpioWrite(SCREEN_CS, true);
 }

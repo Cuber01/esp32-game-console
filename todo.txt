@@ -58,9 +58,3 @@ static const uint8_t PROGMEM
       10,                           //     10 ms delay
     ST77XX_DISPON ,   ST_CMD_DELAY, //  9: Main screen turn on, no args, delay
       10 };                          //    10 ms delay
-
-things i need to add:
-SWRESET
-MADCTL?
-ST77XX_INVON
-NORON
