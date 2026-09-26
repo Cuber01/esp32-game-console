@@ -25,26 +25,22 @@ void ST7789Core::Init(void) {
     ESP_ERROR_CHECK(SetSleep(false));
     delay(200);
 
-    uint8_t data=0x55;
-    esp_err_t e = WriteCommand(COLMOD, &data, 1);
+    ColorFormats newFormats = {
+        .RGBInterfaceFormat = UNSET,
+        .ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL
+    };
+    ESP_ERROR_CHECK(SetColorFormat(&newFormats));
     delay(200);
-
-    // ColorFormats newFormats = {
-    //     .RGBInterfaceFormat = UNSET,
-    //     .ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL
-    // };
-    // ESP_ERROR_CHECK(SetColorFormat(&newFormats));
-    // delay(200);
-    // ColorFormats formats = ReadColorFormat();
-    // Serial.print(formats.RGBInterfaceFormat);
-    // Serial.print(formats.ControlInterfaceFormat);
-    // delay(200);
-    // uint8_t buf[1] = {0x08};
-    // WriteCommand(MADCTL, buf, 1);
-    // delay(200);
-    // ESP_ERROR_CHECK(SetColumnsAddress(0,SCREEN_WIDTH-1));
-    // delay(200);
-    // ESP_ERROR_CHECK(SetRowsAddress(0,SCREEN_HEIGHT-1));
+    ColorFormats formats = ReadColorFormat();
+    Serial.print(formats.RGBInterfaceFormat);
+    Serial.print(formats.ControlInterfaceFormat);
+    delay(200);
+    uint8_t buf[1] = {0x08};
+    WriteCommand(MADCTL, buf, 1);
+    delay(200);
+    ESP_ERROR_CHECK(SetColumnsAddress(0,50));
+    delay(200);
+    ESP_ERROR_CHECK(SetRowsAddress(0,50));
 
 
     delay(200);
@@ -55,7 +51,7 @@ void ST7789Core::Init(void) {
     ESP_ERROR_CHECK(TurnDisplay(true));
     delay(200);
 
-    ESP_ERROR_CHECK(WritePixelData(GREEN, 50));
+    ESP_ERROR_CHECK(WritePixelData(GREEN, 2500));
     uint8_t buffer[150] = {0};
     ESP_ERROR_CHECK(ReadPixelData(buffer, 50));
     for (int i = 0; i < 150; i++) {
@@ -121,11 +117,10 @@ esp_err_t ST7789Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, co
 
     spi_transaction_t t = {};
 
-    t.cmd = cmd;
-    t.length = paramBytes * 8;
-    setupTxBuffer(&t, paramsBuffer, paramBytes);
+    transmitCommand(cmd);
+    transmitParameters(paramsBuffer, paramBytes);
 
-    return spi.Transmit(&t);
+    return ESP_OK;
 }
 
 // Writes pixel data in 2 byte format!!!
@@ -143,15 +138,15 @@ esp_err_t ST7789Core::WritePixelData(uint16_t color, int32_t amount) {
 
         for (uint32_t i = 0; i < bytesToSend; i++) {
             if (i % 2 == 0) {
-                writeBuffer[i] = firstByte;
+                pxWriteBuffer[i] = firstByte;
                 //writeBuffer[i] = static_cast<uint8_t>(esp_random());
             } else {
-                writeBuffer[i] = secondByte;
+                pxWriteBuffer[i] = secondByte;
                 //writeBuffer[i] = static_cast<uint8_t>(esp_random());
             }
         }
 
-        const esp_err_t err = transmitParameters(writeBuffer, bytesToSend);
+        const esp_err_t err = transmitParameters(pxWriteBuffer, bytesToSend);
         if (err != ESP_OK) {
             return err;
         }
@@ -186,15 +181,28 @@ esp_err_t ST7789Core::transmitParameters(const uint8_t* paramsBuffer, const size
     spi.GpioWrite(SCREEN_DC, true); // Send Parameters
 
     spi_transaction_t paramsTrans = {};
-    setupTxBuffer(&paramsTrans, paramsBuffer, paramBytes);
+
+    //setupTxBuffer(&paramsTrans, paramsBuffer, paramBytes);
+    if (paramBytes <= 4) {
+        paramsTrans.flags = SPI_TRANS_USE_TXDATA;
+        for (size_t i = 0; i < paramBytes; i++) {
+            paramsTrans.tx_data[i] = paramsBuffer[i];
+        }
+    } else {
+        paramsTrans.tx_buffer = paramsBuffer;
+    }
+    // ----
+
     paramsTrans.length = paramBytes * 8;
 
     esp_err_t err = spi.Transmit(&paramsTrans);
     return err;
 }
 
+// TODO for whatever reason this function clears out memory of paramsBuffer, but I only see it in debug, check if its a debugger bug
 void ST7789Core::setupTxBuffer(spi_transaction_t* trans, const uint8_t* paramsBuffer, const size_t paramBytes) {
     // Use internal buffer for small parameter sets (<= 4 bytes) to avoid DMA alignment issues
+    Serial.println(*paramsBuffer);
     if (paramBytes <= 4) {
         trans->flags = SPI_TRANS_USE_TXDATA;
         for (size_t i = 0; i < paramBytes; i++) {

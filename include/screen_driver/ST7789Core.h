@@ -11,7 +11,7 @@
 class ST7789Core {
     SPIHandler spi;
     static constexpr uint32_t WriteBufferSize = 128;
-    uint8_t writeBuffer[WriteBufferSize] = {};
+    uint8_t pxWriteBuffer[WriteBufferSize] = {};
 
 public:
     void Init();
