@@ -12,8 +12,6 @@
 void ST7789Core::Init(void) {
     spi.Init();
 
-    spi.GpioWrite(SCREEN_CS, false);
-
     ESP_ERROR_CHECK(transmitCommand(SWRESET));
     delay(120);
     ESP_ERROR_CHECK(SetSleep(false));
@@ -33,18 +31,16 @@ void ST7789Core::Init(void) {
     uint8_t buf[1] = {0x00};
     WriteCommand(MADCTL, buf, 1);
 
-    ESP_ERROR_CHECK(SetColumnsAddress(0,SCREEN_WIDTH-1));
-    ESP_ERROR_CHECK(SetRowsAddress(0,SCREEN_HEIGHT-1));
-
+    ESP_ERROR_CHECK(SetColumnsAddress(10,99));
+    ESP_ERROR_CHECK(SetRowsAddress(10,99));
 
     transmitCommand(INVON);
     transmitCommand(NORON);
     ESP_ERROR_CHECK(TurnDisplay(true));
     delay(200);
 
-    ESP_ERROR_CHECK(WritePixelData(MAGENTA, 76800));
+    ESP_ERROR_CHECK(WritePixelData(GREEN, 810));
 
-    spi.GpioWrite(SCREEN_CS, true);
 }
 
 uint32_t ST7789Core::ReadDisplayID(void) {
@@ -88,7 +84,7 @@ esp_err_t ST7789Core::ReadCommand(uint8_t cmd, uint8_t* receiveBuffer,
     t.base.rxlength = rxInformationBytes * 8;
     t.base.rx_buffer = receiveBuffer;
 
-    return spi.Transmit(reinterpret_cast<spi_transaction_t *>(&t));
+    return spi.Transmit(reinterpret_cast<spi_transaction_t *>(&t), SCREEN_CS);
 }
 
 esp_err_t ST7789Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, const size_t paramBytes) {
@@ -111,6 +107,7 @@ esp_err_t ST7789Core::WritePixelData(uint16_t color, uint32_t amount) {
 
     uint8_t firstByte = static_cast<uint8_t>(color >> 8);
     uint8_t secondByte = static_cast<uint8_t>(color & 0x00FF);
+    spi.GpioWrite(SCREEN_CS, false);
     while (totalBytesToSend > 0) {
         uint32_t bytesToSend = WriteBufferSize > totalBytesToSend ? totalBytesToSend : WriteBufferSize;
 
@@ -122,12 +119,13 @@ esp_err_t ST7789Core::WritePixelData(uint16_t color, uint32_t amount) {
             }
         }
 
-        const esp_err_t err = transmitParameters(pxWriteBuffer, bytesToSend);
+        const esp_err_t err = transmitParameters(pxWriteBuffer, bytesToSend, true);
         if (err != ESP_OK) {
             return err;
         }
         totalBytesToSend -= WriteBufferSize;
     }
+    spi.GpioWrite(SCREEN_CS, true);
 
     return ESP_OK;
 }
@@ -189,11 +187,11 @@ esp_err_t ST7789Core::transmitCommand(Commands cmd) {
     commandTrans.tx_data[0] = cmd;
     commandTrans.length = 8;
 
-    esp_err_t err = spi.Transmit(&commandTrans);
+    esp_err_t err = spi.Transmit(&commandTrans, SCREEN_CS);
     return err;
 }
 
-esp_err_t ST7789Core::transmitParameters(const uint8_t* paramsBuffer, const size_t paramBytes) {
+esp_err_t ST7789Core::transmitParameters(const uint8_t* paramsBuffer, const size_t paramBytes, bool manualChipSelect) {
     spi.GpioWrite(SCREEN_DC, true); // Send Parameters
 
     spi_transaction_t paramsTrans = {};
@@ -211,7 +209,14 @@ esp_err_t ST7789Core::transmitParameters(const uint8_t* paramsBuffer, const size
 
     paramsTrans.length = paramBytes * 8;
 
-    esp_err_t err = spi.Transmit(&paramsTrans);
+    esp_err_t err;
+
+    if (manualChipSelect) {
+        err = spi.Transmit(&paramsTrans, SCREEN_CS);
+    } else {
+        err = spi.TransmitWithManualCS(&paramsTrans);
+    }
+
     return err;
 }
 

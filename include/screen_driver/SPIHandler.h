@@ -9,8 +9,9 @@ class SPIHandler {
 public:
     void Init();
     esp_err_t GpioWrite(uint8_t pin, bool level);
-    esp_err_t Transmit(spi_transaction_t* transaction);
+    esp_err_t Transmit(spi_transaction_t *transaction, uint8_t chipSelectPin);
 
+    esp_err_t TransmitWithManualCS(spi_transaction_t *transaction);
 };
 
 

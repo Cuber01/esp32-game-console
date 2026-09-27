@@ -48,7 +48,14 @@ esp_err_t SPIHandler::GpioWrite(uint8_t pin, const bool level) {
     return gpio_set_level(static_cast<gpio_num_t>(pin), level ? 1 : 0);
 }
 
-esp_err_t SPIHandler::Transmit(spi_transaction_t* transaction) {
+esp_err_t SPIHandler::Transmit(spi_transaction_t* transaction, uint8_t chipSelectPin) {
+    GpioWrite(chipSelectPin, false);
+    esp_err_t err = spi_device_transmit(spiHandle, transaction);
+    GpioWrite(chipSelectPin, true);
+    return err;
+}
+
+esp_err_t SPIHandler::TransmitWithManualCS(spi_transaction_t* transaction) {
     return spi_device_transmit(spiHandle, transaction);
 }
 

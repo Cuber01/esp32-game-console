@@ -24,7 +24,7 @@ public:
     esp_err_t ReadPixelData(uint8_t *receiveBuffer, int32_t amount);
 
     esp_err_t transmitCommand(Commands cmd);
-    esp_err_t transmitParameters(const uint8_t *paramsBuffer, size_t paramBytes);
+    esp_err_t transmitParameters(const uint8_t* paramsBuffer, const size_t paramBytes, bool manualChipSelect=false);
 
     void setupTxBuffer(spi_transaction_t *trans, const uint8_t *paramsBuffer, size_t paramBytes);
 
