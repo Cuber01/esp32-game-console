@@ -4,7 +4,7 @@
 #include <array>
 
 #include "Commands.h"
-#include "DisplayPixelFormat.h"
+#include "DisplaySettings.h"
 #include "SPIHandler.h"
 
 
@@ -20,7 +20,7 @@ public:
     esp_err_t ReadCommand(uint8_t cmd, uint8_t *receiveBuffer, size_t rxInformationBytes, size_t rxDummyBytes);
     esp_err_t WriteCommand(Commands cmd, uint8_t *paramsBuffer, size_t paramBytes);
 
-    esp_err_t WritePixelData(uint16_t color, int32_t amount);
+    esp_err_t WritePixelData(uint16_t color, uint32_t amount);
     esp_err_t ReadPixelData(uint8_t *receiveBuffer, int32_t amount);
 
     esp_err_t transmitCommand(Commands cmd);

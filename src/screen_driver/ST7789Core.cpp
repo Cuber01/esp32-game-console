@@ -6,7 +6,7 @@
 #include "graphics.h"
 #include "driver/spi_master.h"
 #include "screen_driver/Commands.h"
-#include "screen_driver/DisplayPixelFormat.h"
+#include "screen_driver/DisplaySettings.h"
 #include "screen_driver/Colors.h"
 
 void ST7789Core::Init(void) {
@@ -42,10 +42,7 @@ void ST7789Core::Init(void) {
     ESP_ERROR_CHECK(TurnDisplay(true));
     delay(200);
 
-    ESP_ERROR_CHECK(WritePixelData(BLUE, 76800));
-
-
-    delay(200);
+    ESP_ERROR_CHECK(WritePixelData(MAGENTA, 76800));
 
     spi.GpioWrite(SCREEN_CS, true);
 }
@@ -73,8 +70,8 @@ ColorFormats ST7789Core::ReadColorFormat() {
     uint8_t lowNibble =  ((*readBuffer) & 0x0F);
 
     ColorFormats rv = {};
-    rv.RGBInterfaceFormat = static_cast<DisplayPixelFormat>(highNibble);
-    rv.ControlInterfaceFormat = static_cast<DisplayPixelFormat>(lowNibble);
+    rv.RGBInterfaceFormat = static_cast<DisplaySettings>(highNibble);
+    rv.ControlInterfaceFormat = static_cast<DisplaySettings>(lowNibble);
 
     return rv;
 }
@@ -107,14 +104,15 @@ esp_err_t ST7789Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, co
 
 // Writes pixel data in 2 byte format!!!
 // [8bit data] + [8bit data]
-esp_err_t ST7789Core::WritePixelData(uint16_t color, int32_t amount) {
-    assert(amount > 0);
+esp_err_t ST7789Core::WritePixelData(uint16_t color, uint32_t amount) {
+    assert(amount <= SCREEN_WIDTH*SCREEN_HEIGHT);
     transmitCommand(RAMWR);
+    uint32_t totalBytesToSend = amount*2;
 
     uint8_t firstByte = static_cast<uint8_t>(color >> 8);
     uint8_t secondByte = static_cast<uint8_t>(color & 0x00FF);
-    while (amount > 0) {
-        uint32_t bytesToSend = WriteBufferSize > amount*2 ? amount*2 : WriteBufferSize;
+    while (totalBytesToSend > 0) {
+        uint32_t bytesToSend = WriteBufferSize > totalBytesToSend ? totalBytesToSend : WriteBufferSize;
 
         for (uint32_t i = 0; i < bytesToSend; i++) {
             if (i % 2 == 0) {
@@ -128,7 +126,7 @@ esp_err_t ST7789Core::WritePixelData(uint16_t color, int32_t amount) {
         if (err != ESP_OK) {
             return err;
         }
-        amount -= WriteBufferSize;
+        totalBytesToSend -= WriteBufferSize;
     }
 
     return ESP_OK;
