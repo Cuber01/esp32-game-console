@@ -12,35 +12,46 @@
 void ST7789Core::Init(void) {
     spi.Init();
 
+    // Wake up software
     ESP_ERROR_CHECK(transmitCommand(SWRESET));
     delay(120);
     ESP_ERROR_CHECK(SetSleep(false));
     delay(120);
 
-    ColorFormats newFormats = {
-        .RGBInterfaceFormat = UNSET,
-        .ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL
-    };
+    // Setup screen settings
+    DisplayConfig newFormats {};
+    newFormats.bits.RGBInterfaceFormat = UNSET;
+    newFormats.bits.ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL;
     ESP_ERROR_CHECK(SetColorFormat(&newFormats));
-    delay(100);
-    ColorFormats formats = ReadColorFormat();
-    Serial.print(formats.RGBInterfaceFormat);
-    Serial.print(formats.ControlInterfaceFormat);
+
+#ifdef DEBUG
+    volatile DisplayConfig formats = ReadColorFormat();
+    Serial.println(formats.bits.RGBInterfaceFormat);
+    Serial.println(formats.bits.ControlInterfaceFormat);
+#endif
+
+    // MADCTL
+    MadctlConfig newMadctl {};
+    newMadctl.bits.mh = false;
+    newMadctl.bits.mv = false;
+    newMadctl.bits.mx = false;
+    newMadctl.bits.ml = false;
+    newMadctl.bits.mh = false;
+    newMadctl.bits.rgb = false;
+    SetMadctl(&newMadctl);
     delay(200);
 
-    uint8_t buf[1] = {0x00};
-    WriteCommand(MADCTL, buf, 1);
-
-    ESP_ERROR_CHECK(SetColumnsAddress(10,99));
-    ESP_ERROR_CHECK(SetRowsAddress(10,99));
+#ifdef DEBUG
+    volatile MadctlConfig madctl = ReadMadctl();
+    Serial.println(madctl.raw);
+#endif
 
     transmitCommand(INVON);
     transmitCommand(NORON);
+
+    // Turn on
     ESP_ERROR_CHECK(TurnDisplay(true));
     delay(200);
-
-    ESP_ERROR_CHECK(WritePixelData(GREEN, 810));
-
 }
 
 uint32_t ST7789Core::ReadDisplayID(void) {
@@ -57,18 +68,21 @@ uint32_t ST7789Core::ReadDisplayID(void) {
            |static_cast<uint32_t>(id3);
 }
 
-ColorFormats ST7789Core::ReadColorFormat() {
+DisplayConfig ST7789Core::ReadColorFormat() {
+    uint8_t readBuffer[1] = {0};
+    ESP_ERROR_CHECK(ReadCommand(RDDCOLMOD, readBuffer, 1, 1));
+    DisplayConfig rv = {};
+    rv.raw = readBuffer[0];
+    return rv;
+}
+
+MadctlConfig ST7789Core::ReadMadctl() {
     uint8_t readBuffer[1] = {0};
 
-    ESP_ERROR_CHECK(ReadCommand(RDDCOLMOD, readBuffer, 1, 1));
+    ESP_ERROR_CHECK(ReadCommand(RDDMADCTL, readBuffer, 1, 1));
 
-    uint8_t highNibble = (*readBuffer >> 4);
-    uint8_t lowNibble =  ((*readBuffer) & 0x0F);
-
-    ColorFormats rv = {};
-    rv.RGBInterfaceFormat = static_cast<DisplaySettings>(highNibble);
-    rv.ControlInterfaceFormat = static_cast<DisplaySettings>(lowNibble);
-
+    MadctlConfig rv {};
+    rv.raw = *readBuffer;
     return rv;
 }
 
@@ -172,11 +186,12 @@ esp_err_t ST7789Core::SetRowsAddress(uint16_t y1, uint16_t y2) {
     return e;
 }
 
-esp_err_t ST7789Core::SetColorFormat(ColorFormats* config) {
-    uint8_t writeBuffer = (config->RGBInterfaceFormat << 4) | config->ControlInterfaceFormat;
-    esp_err_t e = WriteCommand(COLMOD, &writeBuffer, 1);
-    ESP_ERROR_CHECK(e);
-    return e;
+esp_err_t ST7789Core::SetColorFormat(DisplayConfig* config) {
+    return WriteCommand(COLMOD, &config->raw, 1);
+}
+
+esp_err_t ST7789Core::SetMadctl(MadctlConfig* config) {
+    return WriteCommand(MADCTL, &config->raw, 1);
 }
 
 esp_err_t ST7789Core::transmitCommand(Commands cmd) {

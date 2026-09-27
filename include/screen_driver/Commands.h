@@ -14,7 +14,8 @@ enum Commands {
     DISPON=0x29, // Turn on display
     DISPOFF=0x28, // Turn off display
     SWRESET=0x01, // Software reset
-    MADCTL=0x36,
+    MADCTL=0x36, // Memory Data Access Control Settings
+    RDDMADCTL=0x0B, // Read MADCTL
     INVON=0x21, // Display color inversion on
     INVOFF=0x20, // Display color inversion off
     NORON=0x13,

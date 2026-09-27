@@ -38,9 +38,13 @@ public:
 
     esp_err_t SetColumnsAddress(uint8_t y1, uint8_t y2);
 
-    ColorFormats ReadColorFormat();
+    DisplayConfig ReadColorFormat();
 
-    esp_err_t SetColorFormat(ColorFormats *config);
+    MadctlConfig ReadMadctl();
+
+    esp_err_t SetColorFormat(DisplayConfig* config);
+
+    esp_err_t SetMadctl(MadctlConfig *config);
 };
 
 
