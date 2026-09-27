@@ -15,7 +15,8 @@ enum Commands {
     DISPOFF=0x28, // Turn off display
     SWRESET=0x01, // Software reset
     MADCTL=0x36,
-    INVON=0x21,
+    INVON=0x21, // Display color inversion on
+    INVOFF=0x20, // Display color inversion off
     NORON=0x13,
 };
 

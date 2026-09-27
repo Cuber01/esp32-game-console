@@ -12,51 +12,38 @@
 void ST7789Core::Init(void) {
     spi.Init();
 
-    spi.GpioWrite(SCREEN_RST, false);
-    delay(1000);
-    spi.GpioWrite(SCREEN_RST, true);
-
-    delay(500);
     spi.GpioWrite(SCREEN_CS, false);
-    delay(200);
 
     ESP_ERROR_CHECK(transmitCommand(SWRESET));
-    delay(200);
+    delay(120);
     ESP_ERROR_CHECK(SetSleep(false));
-    delay(200);
+    delay(120);
 
     ColorFormats newFormats = {
         .RGBInterfaceFormat = UNSET,
         .ControlInterfaceFormat = DISPLAY_16_BIT_PIXEL
     };
     ESP_ERROR_CHECK(SetColorFormat(&newFormats));
-    delay(200);
+    delay(100);
     ColorFormats formats = ReadColorFormat();
     Serial.print(formats.RGBInterfaceFormat);
     Serial.print(formats.ControlInterfaceFormat);
     delay(200);
-    uint8_t buf[1] = {0x08};
+
+    uint8_t buf[1] = {0x00};
     WriteCommand(MADCTL, buf, 1);
-    delay(200);
-    ESP_ERROR_CHECK(SetColumnsAddress(0,50));
-    delay(200);
-    ESP_ERROR_CHECK(SetRowsAddress(0,50));
+
+    ESP_ERROR_CHECK(SetColumnsAddress(0,SCREEN_WIDTH-1));
+    ESP_ERROR_CHECK(SetRowsAddress(0,SCREEN_HEIGHT-1));
 
 
-    delay(200);
     transmitCommand(INVON);
-    delay(200);
     transmitCommand(NORON);
-    delay(200);
     ESP_ERROR_CHECK(TurnDisplay(true));
     delay(200);
 
-    ESP_ERROR_CHECK(WritePixelData(GREEN, 2500));
-    uint8_t buffer[150] = {0};
-    ESP_ERROR_CHECK(ReadPixelData(buffer, 50));
-    for (int i = 0; i < 150; i++) {
-        Serial.print(buffer[i]);
-    }
+    ESP_ERROR_CHECK(WritePixelData(BLUE, 76800));
+
 
     delay(200);
 
@@ -66,9 +53,7 @@ void ST7789Core::Init(void) {
 uint32_t ST7789Core::ReadDisplayID(void) {
     uint8_t readBuffer[3] = {0};
 
-    //spi.GpioWrite(SCREEN_CS, false);
     ReadCommand(RDDID, readBuffer, 3, 1);
-    //spi.GpioWrite(SCREEN_CS, true);
 
     uint8_t id1 = readBuffer[0];
     uint8_t id2 = readBuffer[1];
@@ -82,9 +67,7 @@ uint32_t ST7789Core::ReadDisplayID(void) {
 ColorFormats ST7789Core::ReadColorFormat() {
     uint8_t readBuffer[1] = {0};
 
-    //spi.GpioWrite(SCREEN_CS, false);
     ESP_ERROR_CHECK(ReadCommand(RDDCOLMOD, readBuffer, 1, 1));
-    //spi.GpioWrite(SCREEN_CS, true);
 
     uint8_t highNibble = (*readBuffer >> 4);
     uint8_t lowNibble =  ((*readBuffer) & 0x0F);
@@ -98,11 +81,10 @@ ColorFormats ST7789Core::ReadColorFormat() {
 
 esp_err_t ST7789Core::ReadCommand(uint8_t cmd, uint8_t* receiveBuffer,
                                  size_t rxInformationBytes, size_t rxDummyBytes) {
-    // Pull DC LOW for Command Phase
     spi.GpioWrite(SCREEN_DC, false);
 
     spi_transaction_ext_t t = {};
-    t.base.flags = SPI_TRANS_VARIABLE_CMD; // TODO NO NEED FOR THIS FLAG HERE, I THINK WE CAN SET THE DEFAULT IN CONFIG INSTEAD
+    t.base.flags = SPI_TRANS_VARIABLE_CMD;
     t.base.cmd = cmd;
     t.command_bits = 8;
     t.dummy_bits = rxDummyBytes * 8;
@@ -127,8 +109,6 @@ esp_err_t ST7789Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, co
 // [8bit data] + [8bit data]
 esp_err_t ST7789Core::WritePixelData(uint16_t color, int32_t amount) {
     assert(amount > 0);
-    //spi.GpioWrite(SCREEN_CS, false);
-
     transmitCommand(RAMWR);
 
     uint8_t firstByte = static_cast<uint8_t>(color >> 8);
@@ -139,10 +119,8 @@ esp_err_t ST7789Core::WritePixelData(uint16_t color, int32_t amount) {
         for (uint32_t i = 0; i < bytesToSend; i++) {
             if (i % 2 == 0) {
                 pxWriteBuffer[i] = firstByte;
-                //writeBuffer[i] = static_cast<uint8_t>(esp_random());
             } else {
                 pxWriteBuffer[i] = secondByte;
-                //writeBuffer[i] = static_cast<uint8_t>(esp_random());
             }
         }
 
@@ -163,7 +141,47 @@ esp_err_t ST7789Core::ReadPixelData(uint8_t* receiveBuffer, int32_t amount) {
     return ReadCommand(RAMRD, receiveBuffer, amount*3, 0);
 }
 
+esp_err_t ST7789Core::SetSleep(bool sleep) {
+    return transmitCommand(sleep ? SLPIN : SLPOUT);
+}
 
+esp_err_t ST7789Core::TurnDisplay(bool on) {
+    return transmitCommand(on ? DISPON : DISPOFF);
+}
+
+esp_err_t ST7789Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
+    assert(x1 <= x2 && x2 <= SCREEN_WIDTH-1);
+    // 1st and 3rd parameter should be empty because SCREEN WIDTH is small
+    // TODO support bigger?
+    uint8_t writeBuffer[4] = {
+        0,
+        x1,
+        0,
+        x2
+    };
+    esp_err_t e = WriteCommand(CASET, writeBuffer, 4);
+    return e;
+}
+
+esp_err_t ST7789Core::SetRowsAddress(uint16_t y1, uint16_t y2) {
+    assert(y1 <= y2 && y2 <= SCREEN_HEIGHT-1);
+
+    uint8_t writeBuffer[4] = {
+        static_cast<uint8_t>(y1 >> 8),
+        static_cast<uint8_t>(y1 & 0x00FF),
+        static_cast<uint8_t>(y2 >> 8),
+        static_cast<uint8_t>(y2 & 0x00FF)
+    };
+    esp_err_t e = WriteCommand(RASET, writeBuffer, 4);
+    return e;
+}
+
+esp_err_t ST7789Core::SetColorFormat(ColorFormats* config) {
+    uint8_t writeBuffer = (config->RGBInterfaceFormat << 4) | config->ControlInterfaceFormat;
+    esp_err_t e = WriteCommand(COLMOD, &writeBuffer, 1);
+    ESP_ERROR_CHECK(e);
+    return e;
+}
 
 esp_err_t ST7789Core::transmitCommand(Commands cmd) {
     spi.GpioWrite(SCREEN_DC, false);
@@ -200,63 +218,17 @@ esp_err_t ST7789Core::transmitParameters(const uint8_t* paramsBuffer, const size
 }
 
 // TODO for whatever reason this function clears out memory of paramsBuffer, but I only see it in debug, check if its a debugger bug
-void ST7789Core::setupTxBuffer(spi_transaction_t* trans, const uint8_t* paramsBuffer, const size_t paramBytes) {
-    // Use internal buffer for small parameter sets (<= 4 bytes) to avoid DMA alignment issues
-    Serial.println(*paramsBuffer);
-    if (paramBytes <= 4) {
-        trans->flags = SPI_TRANS_USE_TXDATA;
-        for (size_t i = 0; i < paramBytes; i++) {
-            trans->tx_data[i] = paramsBuffer[i];
-        }
-    } else {
-        trans->tx_buffer = paramsBuffer;
-    }
-    trans->length = paramBytes * 8;
-}
+// void ST7789Core::setupTxBuffer(spi_transaction_t* trans, const uint8_t* paramsBuffer, const size_t paramBytes) {
+//     // Use internal buffer for small parameter sets (<= 4 bytes) to avoid DMA alignment issues
+//     Serial.println(*paramsBuffer);
+//     if (paramBytes <= 4) {
+//         trans->flags = SPI_TRANS_USE_TXDATA;
+//         for (size_t i = 0; i < paramBytes; i++) {
+//             trans->tx_data[i] = paramsBuffer[i];
+//         }
+//     } else {
+//         trans->tx_buffer = paramsBuffer;
+//     }
+//     trans->length = paramBytes * 8;
+// }
 
-esp_err_t ST7789Core::SetSleep(bool sleep) {
-    return transmitCommand(sleep ? SLPIN : SLPOUT);
-}
-
-esp_err_t ST7789Core::TurnDisplay(bool on) {
-    return transmitCommand(on ? DISPON : DISPOFF);
-}
-
-esp_err_t ST7789Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
-    assert(x1 <= x2 && x2 <= SCREEN_WIDTH-1);
-    //spi.GpioWrite(SCREEN_CS, false);
-    // 1st and 3rd parameter should be empty because SCREEN WIDTH is small     // TODO support bigger?
-    uint8_t writeBuffer[4] = {
-        0,
-        x1,
-        0,
-        x2
-    };
-    esp_err_t e = WriteCommand(CASET, writeBuffer, 4);
-    //spi.GpioWrite(SCREEN_CS, true);
-    return e;
-}
-
-esp_err_t ST7789Core::SetRowsAddress(uint16_t y1, uint16_t y2) {
-    assert(y1 <= y2 && y2 <= SCREEN_HEIGHT-1);
-
-    //spi.GpioWrite(SCREEN_CS, false);
-    uint8_t writeBuffer[4] = {
-        static_cast<uint8_t>(y1 >> 8),
-        static_cast<uint8_t>(y1 & 0x00FF),
-        static_cast<uint8_t>(y2 >> 8),
-        static_cast<uint8_t>(y2 & 0x00FF)
-    };
-    esp_err_t e = WriteCommand(RASET, writeBuffer, 4);
-    //spi.GpioWrite(SCREEN_CS, true);
-    return e;
-}
-
-esp_err_t ST7789Core::SetColorFormat(ColorFormats* config) {
-    //spi.GpioWrite(SCREEN_CS, false);
-    uint8_t writeBuffer = (config->RGBInterfaceFormat << 4) | config->ControlInterfaceFormat;
-    esp_err_t e = WriteCommand(COLMOD, &writeBuffer, 1);
-    //spi.GpioWrite(SCREEN_CS, true);
-    ESP_ERROR_CHECK(e);
-    return e;
-}
