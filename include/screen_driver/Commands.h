@@ -8,6 +8,7 @@ enum Commands {
     CASET=0x2A, // Set address column
     RASET=0x2B, // Set address row
     RAMWR=0x2C, // Write to RAM
+    WRMEMC=0x3C, // Continue RAM write
     RAMRD=0x2E, // Read from RAM
     SLPIN=0x10, // Turn on sleep mode
     SLPOUT=0x11, // Turn off sleep mode

@@ -114,10 +114,10 @@ esp_err_t ST7789Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, co
 
 // Writes pixel data in 2 byte format!!!
 // [8bit data] + [8bit data]
-esp_err_t ST7789Core::WritePixelData(uint16_t color, uint32_t amount) {
+esp_err_t ST7789Core::WritePixelData(uint16_t color, uint32_t amount, bool isContinuing) {
     assert(amount <= SCREEN_WIDTH*SCREEN_HEIGHT);
-    transmitCommand(RAMWR);
-    uint32_t totalBytesToSend = amount*2;
+    transmitCommand(isContinuing ? WRMEMC : RAMWR);
+    int32_t totalBytesToSend = amount*2;
 
     uint8_t firstByte = static_cast<uint8_t>(color >> 8);
     uint8_t secondByte = static_cast<uint8_t>(color & 0x00FF);

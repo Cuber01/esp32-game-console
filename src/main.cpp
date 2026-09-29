@@ -1,21 +1,26 @@
 #include <Arduino.h>
 
+#include "graphics.h"
 #include "screen_driver/Colors.h"
+#include "screen_driver/ST7789.h"
 #include "screen_driver/ST7789Core.h"
 
-//Adafruit_ST7789 tft = Adafruit_ST7789(SCREEN_CS, SCREEN_DC, SCREEN_RST);
-auto* driver = new ST7789Core();
+
+ST7789 gfx = ST7789();
 void setup() {
     Serial.begin(9600);
     Serial.print(F("Hello! ST77xx TFT Test"));
-    driver->Init();
+    gfx.Init();
+    gfx.FillScreen(BLUE);
 
-    ESP_ERROR_CHECK(driver->SetColumnsAddress(10,99));
-    ESP_ERROR_CHECK(driver->SetRowsAddress(10,99));
-    ESP_ERROR_CHECK(driver->WritePixelData(CYAN, 810));
+    gfx.DrawText(100,100, "HELLO WORLD!");
 }
 
 void loop() {
+    //gfx.FillScreen(esp_random());
+
+    // delay(50);
+
     // if (IsRunning()) {
     //     gameLoop();
     // }

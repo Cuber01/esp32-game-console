@@ -34,7 +34,7 @@ void SPIHandler::Init() {
     // Configure Device with HALF-DUPLEX
     spi_device_interface_config_t deviceConfig = {
         .mode = 0,                          // SPI Mode
-        .clock_speed_hz = 2 * 1000 * 1000, // 6.6 MHz
+        .clock_speed_hz = 6 * 6000 * 1000, 
         .spics_io_num = SCREEN_CS,
         .flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_3WIRE,      // Crucial for 1-wire bidirectional read
         .queue_size = 7,
