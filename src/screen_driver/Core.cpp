@@ -1,5 +1,5 @@
 #include "cstdint"
-#include "screen_driver/ST7789Core.h"
+#include "screen_driver/Core.h"
 
 #include <HardwareSerial.h>
 
@@ -8,9 +8,11 @@
 #include "screen_driver/Commands.h"
 #include "screen_driver/DisplaySettings.h"
 #include "screen_driver/Colors.h"
+#include "screen_driver/Font.h"
 
-void ST7789Core::Init(void) {
-    spi.Init();
+void Core::Init(SPIHandler* spiHandler)
+{
+    this->spi = spiHandler;
 
     // Wake up software
     ESP_ERROR_CHECK(transmitCommand(SWRESET));
@@ -54,7 +56,7 @@ void ST7789Core::Init(void) {
     delay(200);
 }
 
-uint32_t ST7789Core::ReadDisplayID(void) {
+uint32_t Core::ReadDisplayID(void) {
     uint8_t readBuffer[3] = {0};
 
     ReadCommand(RDDID, readBuffer, 3, 1);
@@ -68,7 +70,7 @@ uint32_t ST7789Core::ReadDisplayID(void) {
            |static_cast<uint32_t>(id3);
 }
 
-DisplayConfig ST7789Core::ReadColorFormat() {
+DisplayConfig Core::ReadColorFormat() {
     uint8_t readBuffer[1] = {0};
     ESP_ERROR_CHECK(ReadCommand(RDDCOLMOD, readBuffer, 1, 1));
     DisplayConfig rv = {};
@@ -76,7 +78,7 @@ DisplayConfig ST7789Core::ReadColorFormat() {
     return rv;
 }
 
-MadctlConfig ST7789Core::ReadMadctl() {
+MadctlConfig Core::ReadMadctl() {
     uint8_t readBuffer[1] = {0};
 
     ESP_ERROR_CHECK(ReadCommand(RDDMADCTL, readBuffer, 1, 1));
@@ -86,9 +88,9 @@ MadctlConfig ST7789Core::ReadMadctl() {
     return rv;
 }
 
-esp_err_t ST7789Core::ReadCommand(uint8_t cmd, uint8_t* receiveBuffer,
+esp_err_t Core::ReadCommand(uint8_t cmd, uint8_t* receiveBuffer,
                                  size_t rxInformationBytes, size_t rxDummyBytes) {
-    spi.GpioWrite(SCREEN_DC, false);
+    spi->GpioWrite(SCREEN_DC, false);
 
     spi_transaction_ext_t t = {};
     t.base.flags = SPI_TRANS_VARIABLE_CMD;
@@ -98,10 +100,10 @@ esp_err_t ST7789Core::ReadCommand(uint8_t cmd, uint8_t* receiveBuffer,
     t.base.rxlength = rxInformationBytes * 8;
     t.base.rx_buffer = receiveBuffer;
 
-    return spi.Transmit(reinterpret_cast<spi_transaction_t *>(&t), SCREEN_CS);
+    return spi->Transmit(reinterpret_cast<spi_transaction_t *>(&t), SCREEN_CS);
 }
 
-esp_err_t ST7789Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, const size_t paramBytes) {
+esp_err_t Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, const size_t paramBytes) {
     assert(paramsBuffer != nullptr && paramBytes > 0);
 
     spi_transaction_t t = {};
@@ -114,14 +116,14 @@ esp_err_t ST7789Core::WriteCommand(const Commands cmd, uint8_t* paramsBuffer, co
 
 // Writes pixel data in 2 byte format!!!
 // [8bit data] + [8bit data]
-esp_err_t ST7789Core::WritePixelData(uint16_t color, uint32_t amount, bool isContinuing) {
+esp_err_t Core::WritePixelData(uint16_t color, uint32_t amount, bool isContinuing) {
     assert(amount <= SCREEN_WIDTH*SCREEN_HEIGHT);
     transmitCommand(isContinuing ? WRMEMC : RAMWR);
     int32_t totalBytesToSend = amount*2;
 
     uint8_t firstByte = static_cast<uint8_t>(color >> 8);
     uint8_t secondByte = static_cast<uint8_t>(color & 0x00FF);
-    spi.GpioWrite(SCREEN_CS, false);
+    spi->GpioWrite(SCREEN_CS, false);
     while (totalBytesToSend > 0) {
         uint32_t bytesToSend = WriteBufferSize > totalBytesToSend ? totalBytesToSend : WriteBufferSize;
 
@@ -139,27 +141,27 @@ esp_err_t ST7789Core::WritePixelData(uint16_t color, uint32_t amount, bool isCon
         }
         totalBytesToSend -= WriteBufferSize;
     }
-    spi.GpioWrite(SCREEN_CS, true);
+    spi->GpioWrite(SCREEN_CS, true);
 
     return ESP_OK;
 }
 
 // Reads pixel data in 3-byte format!!!
 // [6bit data + 00] + [6bit data + 00] + [6bit data + 00]
-esp_err_t ST7789Core::ReadPixelData(uint8_t* receiveBuffer, int32_t amount) {
+esp_err_t Core::ReadPixelData(uint8_t* receiveBuffer, int32_t amount) {
     assert(amount > 0);
     return ReadCommand(RAMRD, receiveBuffer, amount*3, 0);
 }
 
-esp_err_t ST7789Core::SetSleep(bool sleep) {
+esp_err_t Core::SetSleep(bool sleep) {
     return transmitCommand(sleep ? SLPIN : SLPOUT);
 }
 
-esp_err_t ST7789Core::TurnDisplay(bool on) {
+esp_err_t Core::TurnDisplay(bool on) {
     return transmitCommand(on ? DISPON : DISPOFF);
 }
 
-esp_err_t ST7789Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
+esp_err_t Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
     assert(x1 <= x2 && x2 <= SCREEN_WIDTH-1);
     // 1st and 3rd parameter should be empty because SCREEN WIDTH is small
     // TODO support bigger?
@@ -173,7 +175,7 @@ esp_err_t ST7789Core::SetColumnsAddress(uint8_t x1, uint8_t x2) {
     return e;
 }
 
-esp_err_t ST7789Core::SetRowsAddress(uint16_t y1, uint16_t y2) {
+esp_err_t Core::SetRowsAddress(uint16_t y1, uint16_t y2) {
     assert(y1 <= y2 && y2 <= SCREEN_HEIGHT-1);
 
     uint8_t writeBuffer[4] = {
@@ -186,28 +188,28 @@ esp_err_t ST7789Core::SetRowsAddress(uint16_t y1, uint16_t y2) {
     return e;
 }
 
-esp_err_t ST7789Core::SetColorFormat(DisplayConfig* config) {
+esp_err_t Core::SetColorFormat(DisplayConfig* config) {
     return WriteCommand(COLMOD, &config->raw, 1);
 }
 
-esp_err_t ST7789Core::SetMadctl(MadctlConfig* config) {
+esp_err_t Core::SetMadctl(MadctlConfig* config) {
     return WriteCommand(MADCTL, &config->raw, 1);
 }
 
-esp_err_t ST7789Core::transmitCommand(Commands cmd) {
-    spi.GpioWrite(SCREEN_DC, false);
+esp_err_t Core::transmitCommand(Commands cmd) {
+    spi->GpioWrite(SCREEN_DC, false);
 
     spi_transaction_t commandTrans = {};
     commandTrans.flags = SPI_TRANS_USE_TXDATA; // Use internal buffer instead of pointer to stack
     commandTrans.tx_data[0] = cmd;
     commandTrans.length = 8;
 
-    esp_err_t err = spi.Transmit(&commandTrans, SCREEN_CS);
+    esp_err_t err = spi->Transmit(&commandTrans, SCREEN_CS);
     return err;
 }
 
-esp_err_t ST7789Core::transmitParameters(const uint8_t* paramsBuffer, const size_t paramBytes, bool manualChipSelect) {
-    spi.GpioWrite(SCREEN_DC, true); // Send Parameters
+esp_err_t Core::transmitParameters(const uint8_t* paramsBuffer, const size_t paramBytes, bool manualChipSelect) {
+    spi->GpioWrite(SCREEN_DC, true); // Send Parameters
 
     spi_transaction_t paramsTrans = {};
 
@@ -227,9 +229,9 @@ esp_err_t ST7789Core::transmitParameters(const uint8_t* paramsBuffer, const size
     esp_err_t err;
 
     if (manualChipSelect) {
-        err = spi.Transmit(&paramsTrans, SCREEN_CS);
+        err = spi->Transmit(&paramsTrans, SCREEN_CS);
     } else {
-        err = spi.TransmitWithManualCS(&paramsTrans);
+        err = spi->TransmitWithManualCS(&paramsTrans);
     }
 
     return err;

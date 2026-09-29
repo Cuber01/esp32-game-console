@@ -5,16 +5,16 @@
 
 #include "Commands.h"
 #include "DisplaySettings.h"
-#include "SPIHandler.h"
+#include "DMAHandler.h"
 
 
-class ST7789Core {
-    SPIHandler spi;
+class Core {
+    SPIHandler* spi = nullptr;
     static constexpr uint32_t WriteBufferSize = 128;
     uint8_t pxWriteBuffer[WriteBufferSize] = {};
 
 public:
-    void Init();
+    void Init(SPIHandler* spi_handler );
     uint32_t ReadDisplayID();
 
     esp_err_t ReadCommand(uint8_t cmd, uint8_t *receiveBuffer, size_t rxInformationBytes, size_t rxDummyBytes);

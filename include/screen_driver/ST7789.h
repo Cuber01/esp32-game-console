@@ -3,16 +3,25 @@
 #include <cstdint>
 
 #include "Colors.h"
-#include "ST7789Core.h"
+#include "Core.h"
+#include "DMAHandler.h"
 
 class ST7789 {
 private:
-    ST7789Core* driver = new ST7789Core();
+    DMAHandler* dma = new DMAHandler();
+    Core* core = new Core();
+    SPIHandler* spi = new SPIHandler();
 
+    uint16_t* currentFrameBuffer = nullptr;
     uint16_t textColor = WHITE;
     uint16_t textBackgroundColor = BLACK;
+
 public:
-    void Init();
+    void Init(void (*renderFunction)(uint16_t *buffers));
+
+    void Update();
+
+    void SetFrame(uint16_t *frameBuffer);
 
     void FillScreen(std::uint16_t color) const;
     void DrawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color) const;

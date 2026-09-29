@@ -1,8 +1,7 @@
 #include "screen_driver/SPIHandler.h"
-#include <driver/spi_master.h>
 #include <driver/gpio.h>
-#include "graphics.h"
 
+#include "graphics.h"
 
 void SPIHandler::Init() {
     esp_err_t err = ESP_OK;
@@ -34,7 +33,7 @@ void SPIHandler::Init() {
     // Configure Device with HALF-DUPLEX
     spi_device_interface_config_t deviceConfig = {
         .mode = 0,                          // SPI Mode
-        .clock_speed_hz = 6 * 6000 * 1000, 
+        .clock_speed_hz = 6 * 6000 * 1000,
         .spics_io_num = SCREEN_CS,
         .flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_3WIRE,      // Crucial for 1-wire bidirectional read
         .queue_size = 7,
@@ -44,18 +43,26 @@ void SPIHandler::Init() {
     ESP_ERROR_CHECK(err);
 }
 
+
 esp_err_t SPIHandler::GpioWrite(uint8_t pin, const bool level) {
     return gpio_set_level(static_cast<gpio_num_t>(pin), level ? 1 : 0);
 }
 
-esp_err_t SPIHandler::Transmit(spi_transaction_t* transaction, uint8_t chipSelectPin) {
+esp_err_t SPIHandler::Transmit(spi_transaction_t *transaction, uint8_t chipSelectPin) {
     GpioWrite(chipSelectPin, false);
     esp_err_t err = spi_device_transmit(spiHandle, transaction);
     GpioWrite(chipSelectPin, true);
     return err;
 }
 
-esp_err_t SPIHandler::TransmitWithManualCS(spi_transaction_t* transaction) {
-    return spi_device_transmit(spiHandle, transaction);
+esp_err_t SPIHandler::QueueTransmit(spi_transaction_t *transaction) const {
+    return spi_device_queue_trans(spiHandle, transaction, portMAX_DELAY);
 }
 
+esp_err_t SPIHandler::GetTransactionResult(spi_transaction_t** transactionPointer) const {
+    return spi_device_get_trans_result(spiHandle, transactionPointer, portMAX_DELAY);
+}
+
+esp_err_t SPIHandler::TransmitWithManualCS(spi_transaction_t *transaction) const {
+    return spi_device_transmit(spiHandle, transaction);
+}
