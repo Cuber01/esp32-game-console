@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "Colors.h"
+#include "CommandBuffer.h"
 #include "Core.h"
 #include "DMAHandler.h"
 
@@ -11,13 +12,15 @@ private:
     DMAHandler* dma = new DMAHandler();
     Core* core = new Core();
     SPIHandler* spi = new SPIHandler();
+    CommandBuffer* userCmds = new CommandBuffer();
 
     uint16_t* currentFrameBuffer = nullptr;
     uint16_t textColor = WHITE;
     uint16_t textBackgroundColor = BLACK;
+    void (*userRender)() = nullptr;
 
 public:
-    void Init(void (*renderFunction)(uint16_t *buffers));
+    void Init(void (*renderFunction)());
 
     void Update();
 

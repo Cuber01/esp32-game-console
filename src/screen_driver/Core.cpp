@@ -56,7 +56,8 @@ void Core::Init(SPIHandler* spiHandler)
     delay(200);
 }
 
-uint32_t Core::ReadDisplayID(void) {
+uint32_t Core::ReadDisplayID()
+{
     uint8_t readBuffer[3] = {0};
 
     ReadCommand(RDDID, readBuffer, 3, 1);

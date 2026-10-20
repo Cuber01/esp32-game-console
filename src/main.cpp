@@ -8,8 +8,7 @@
 
 ST7789 gfx = ST7789();
 
-void renderFrame(uint16_t* buffer) {
-    gfx.SetFrame(buffer);
+void renderFrame() {
     gfx.FillScreen(BLUE);
     gfx.DrawRect(10, 10, 100, 100, RED);
 }

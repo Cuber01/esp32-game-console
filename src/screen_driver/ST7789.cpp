@@ -3,31 +3,35 @@
 #include <esp32-hal.h>
 
 #include "graphics.h"
-#include "screen_driver/Colors.h"
-#include "screen_driver/Font.h"
 
-void ST7789::Init(void (*renderFunction)(uint16_t* buffers)) {
+void ST7789::Init(void (*renderFunction)()) {
     spi->Init();
-    dma->Init(renderFunction, spi);
+    dma->Init(spi, userCmds);
     core->Init(spi);
-
-    dma->Start();
+    userRender = renderFunction;
 }
 
 void ST7789::Update() {
+    userCmds->Clear();
+    userRender();
+
+    // TODO finished here
+    dma->StartLoop();
     dma->Loop();
+    dma->EndLoop(nullptr);
 }
 
 void ST7789::FillScreen(uint16_t color) const {
     DrawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, color);
 }
 
-void ST7789::DrawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color) const {
-    for (int i = y; i < y+height; i++) {
-        for (int j = x; j < x+width; j++) {
-            currentFrameBuffer[j+i*width] = color;
-        }
-    }
+void ST7789::DrawRect(const uint16_t x, const uint16_t y, const uint16_t width, const uint16_t height, const uint16_t color) const {
+    userCmds->PushFixedCommand<CmdRectHeader>(OpCode::RECT, CmdRectHeader {.x = x, .y = y, .w = width, .h = height, .color = color});
+    // for (int i = y; i < y+height; i++) {
+    //     for (int j = x; j < x+width; j++) {
+    //         currentFrameBuffer[j+i*width] = color;
+    //     }
+    // }
 }
 
 void ST7789::SetTextColor(uint16_t color) {
@@ -38,9 +42,9 @@ void ST7789::SetTextBackgroundColor(uint16_t color) {
     textBackgroundColor = color;
 }
 
-void ST7789::SetFrame(uint16_t* frameBuffer) {
-    currentFrameBuffer = frameBuffer;
-}
+// void ST7789::SetFrame(uint16_t* frameBuffer) {
+//     currentFrameBuffer = frameBuffer;
+// }
 
 // void ST7789::DrawText(uint16_t x, uint16_t y, const char* text) {
 //     uint16_t currentX = x;

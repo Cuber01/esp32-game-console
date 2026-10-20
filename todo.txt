@@ -24,3 +24,15 @@ CSX (CS): Chip selection signal
 WRX (SCL): Clock
 DCX (DC): Data is regarded as a command when WRX is low. Data is regarded as a parameter or data when WRX is high
 SDA (SDA): Serial input/output data
+
+max_block: 110580
+total_free: 272116
+bytes needed for full screen coverage: 153600
+
+chunk size: 38400 bytes
+amount: 4 chunks / frame
+height: 80px
+width: 240px
+
+We need to allocate it on
+
