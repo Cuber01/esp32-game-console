@@ -28,9 +28,12 @@ public:
     bool RectChunkOverlap(int chunkStart, int chunkEnd, int rectY, int rectH);
 
     void Init(SPIHandler *spiHandler, CommandBuffer *userCmds);
+
+    void RenderFrame();
+
     void StartLoop();
     void EndLoop(spi_transaction_t *readBuffers[]) const;
-    spi_transaction_t *Loop();
+    spi_transaction_t *Loop(uint8_t nextChunkId);
 
 
 };

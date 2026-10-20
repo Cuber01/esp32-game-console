@@ -14,11 +14,7 @@ void ST7789::Init(void (*renderFunction)()) {
 void ST7789::Update() {
     userCmds->Clear();
     userRender();
-
-    // TODO finished here
-    dma->StartLoop();
-    dma->Loop();
-    dma->EndLoop(nullptr);
+    dma->RenderFrame();
 }
 
 void ST7789::FillScreen(uint16_t color) const {
