@@ -47,7 +47,7 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
 }
 
 DMAHandler::RectOverlap DMAHandler::GetRectChunkOverlap(uint16_t chunkStart, uint16_t chunkEnd, uint16_t rectY, uint16_t rectH) {
-    auto* overlap = new RectOverlap();
+    RectOverlap overlap = {0, 0};
     bool doesOverlap = false;
 
     // Starts inside of chunk
@@ -68,7 +68,7 @@ DMAHandler::RectOverlap DMAHandler::GetRectChunkOverlap(uint16_t chunkStart, uin
             overlap->end = rectY + rectH;
         }
     }
-    return *overlap;
+    return overlap;
 }
 
 void DMAHandler::Init(SPIHandler* spiHandler, CommandBuffer* cmdBuffer) {
