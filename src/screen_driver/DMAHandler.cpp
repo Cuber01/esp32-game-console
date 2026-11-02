@@ -5,6 +5,7 @@
 #include <screen_driver/CommandBuffer.h>
 
 #include "screen_driver/Commands.h"
+#include "screen_driver/Core.h"
 
 void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandBuffer& cmdBuffer) {
     memset(chunkBuf, 0, CHUNK_WIDTH * CHUNK_HEIGHT * sizeof(uint16_t));
@@ -16,7 +17,7 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
     const uint8_t* end = ptr + cmdBuffer.GetSize();
 
     while (ptr < end) {
-        OpCode op = static_cast<OpCode>(*ptr++);
+        OpCode op = static_cast<OpCode>(*(ptr++));
 
         switch (op) {
             case OpCode::TEXT: {
@@ -30,9 +31,10 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                 RectOverlap overlap = GetRectChunkOverlap(chunkStartY, chunkEndY, header->y, header->h);
                 if (overlap.end != 0) // Is valid
                 {
-                    for (int y = overlap.start; y < overlap.end; y++) {
+                    for (int y = overlap.start; y <= overlap.end; y++) {
+                        int localY = y - chunkStartY;
                         for (int x = 0; x < CHUNK_WIDTH; x++) {
-                            chunkBuf[y * CHUNK_WIDTH + x] = header->color;
+                            chunkBuf[localY * CHUNK_WIDTH + x] = header->color;
                         }
                     }
                 }
