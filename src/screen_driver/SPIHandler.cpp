@@ -64,7 +64,14 @@ esp_err_t SPIHandler::QueueTransmit(spi_transaction_t* trans) {
 }
 
 esp_err_t SPIHandler::GetTransactionResult(spi_transaction_t** outTrans) {
-    esp_err_t ret = spi_device_get_trans_result(spiHandle, outTrans, portMAX_DELAY);
+    esp_err_t ret = ESP_OK;
+    if (outTrans == nullptr) {
+        spi_transaction_t* dummyTrans = nullptr;
+        ret = spi_device_get_trans_result(spiHandle, &dummyTrans, portMAX_DELAY);
+    } else {
+        ret = spi_device_get_trans_result(spiHandle, outTrans, portMAX_DELAY);
+    }
+
     if (ret == ESP_OK) {
         pendingTransactions--;
     }
