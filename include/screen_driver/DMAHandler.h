@@ -5,9 +5,13 @@
 #include "SPIHandler.h"
 #include "driver/spi_master.h"
 
+
+class Core;
+
 class DMAHandler {
     SPIHandler* spi = nullptr;
     CommandBuffer* userCmds = nullptr;
+    Core * core = nullptr;
 
     static constexpr uint8_t BufferAmount = 2;
     spi_transaction_t trans[BufferAmount] = {};
@@ -27,7 +31,7 @@ public:
 
     bool RectChunkOverlap(int chunkStart, int chunkEnd, int rectY, int rectH);
 
-    void Init(SPIHandler *spiHandler, CommandBuffer *userCmds);
+    void Init(SPIHandler *spiHandler, CommandBuffer *cmdBuffer, Core *core);
 
     void RenderFrame();
 

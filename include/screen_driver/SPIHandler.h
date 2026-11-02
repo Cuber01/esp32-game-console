@@ -15,6 +15,10 @@ public:
 
     esp_err_t QueueTransmit(spi_transaction_t *trans);
 
+    void AcquireBus();
+
+    void ReleaseBus();
+
     esp_err_t GetTransactionResult(spi_transaction_t **outTrans);
 
     void WaitAllFinished();

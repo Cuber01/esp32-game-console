@@ -71,9 +71,10 @@ DMAHandler::RectOverlap DMAHandler::GetRectChunkOverlap(uint16_t chunkStart, uin
     return overlap;
 }
 
-void DMAHandler::Init(SPIHandler* spiHandler, CommandBuffer* cmdBuffer) {
+void DMAHandler::Init(SPIHandler* spiHandler, CommandBuffer* cmdBuffer, Core* driverCore) {
     this->spi = spiHandler;
     this->userCmds = cmdBuffer;
+    this->core = driverCore;
 
     // Setup buffers
     for (int i = 0; i < BufferAmount; i++) {
@@ -81,7 +82,8 @@ void DMAHandler::Init(SPIHandler* spiHandler, CommandBuffer* cmdBuffer) {
             heap_caps_malloc(CHUNK_WIDTH*CHUNK_HEIGHT*sizeof(uint16_t), MALLOC_CAP_DMA)
         );
 
-        trans[i].length = CHUNK_WIDTH*CHUNK_HEIGHT*sizeof(uint16_t);
+        trans[i].length = CHUNK_WIDTH * CHUNK_HEIGHT * sizeof(uint16_t) * 8;
+        trans[i].flags = SPI_TRANS_CS_KEEP_ACTIVE;
         trans[i].tx_buffer = buffers[i];
         trans[i].user = (void*)(uintptr_t)i;
     }
@@ -89,6 +91,7 @@ void DMAHandler::Init(SPIHandler* spiHandler, CommandBuffer* cmdBuffer) {
 }
 
 void DMAHandler::RenderFrame() {
+
     uint8_t chunksSent = BufferAmount;
     StartLoop(); // Fills all buffers and as such sends the amount of chunks equal to amount of buffer
 
@@ -97,9 +100,9 @@ void DMAHandler::RenderFrame() {
         Loop(chunksSent);
         chunksSent++;
     }
+
     EndLoop(nullptr);
 }
-
 
 void DMAHandler::StartLoop() {
     spi->AcquireBus();
@@ -108,21 +111,21 @@ void DMAHandler::StartLoop() {
     core->SetRowsAddress(0, SCREEN_HEIGHT - 1);
 
     spi->GpioWrite(SCREEN_DC, false);
-    spi->GpioWrite(SCREEN_CS, false);
 
-    spi_transaction_t commandTrans = {};
-    commandTrans.flags = SPI_TRANS_USE_TXDATA;
-    commandTrans.tx_data[0] = RAMWR;
-    commandTrans.length = 8;
+    spi_transaction_t ramwrTrans = {};
+    ramwrTrans.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_CS_KEEP_ACTIVE;
+    ramwrTrans.tx_data[0] = RAMWR;
+    ramwrTrans.length = 8;
 
-    esp_err_t err = spi->Transmit(&commandTrans, SCREEN_CS);
+    spi->TransmitWithManualCS(&ramwrTrans);
+    spi->GpioWrite(SCREEN_DC, true);
 
     for (int i = 0; i < BufferAmount; i++) {
+        trans[i].flags = SPI_TRANS_CS_KEEP_ACTIVE; // Restore flag
         RasterizeChunk(buffers[i], i, *userCmds);
-        spi->QueueTransmit(&trans[i]);
+        volatile const esp_err_t err = spi->QueueTransmit(&trans[i]);
+        ESP_ERROR_CHECK(err);
     }
-
-    spi->GpioWrite(SCREEN_DC, true);
 }
 
 spi_transaction_t* DMAHandler::Loop(uint8_t nextChunkId) {
@@ -131,8 +134,14 @@ spi_transaction_t* DMAHandler::Loop(uint8_t nextChunkId) {
 
     if (ret == ESP_OK) {
         int freedIdx = static_cast<int>(reinterpret_cast<uintptr_t>(completedTrans->user));
+
+        if (nextChunkId == CHUNK_AMOUNT-1) {
+            trans[freedIdx].flags = 0; // Clear KEEP CS ACTIVE flag for the last buffer
+        }
+
         RasterizeChunk(buffers[freedIdx], nextChunkId, *userCmds);
-        spi->QueueTransmit(&trans[freedIdx]);
+        volatile const esp_err_t err = spi->QueueTransmit(&trans[freedIdx]);
+        ESP_ERROR_CHECK(err);
     }
     return completedTrans;
 }

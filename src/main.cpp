@@ -7,10 +7,11 @@
 
 
 ST7789 gfx = ST7789();
-
+static int y = 200;
 void renderFrame() {
     gfx.FillScreen(BLUE);
-    gfx.DrawRect(10, 10, 100, 100, RED);
+    gfx.DrawRect(10, y, 100, 10, RED);
+    y-=1;
 }
 
 void setup() {
@@ -18,7 +19,6 @@ void setup() {
     Serial.print(F("Hello! ST77xx TFT Test"));
     gfx.Init(renderFrame);
 }
-
 
 void loop() {
     gfx.Update();

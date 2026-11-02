@@ -6,7 +6,7 @@
 
 void ST7789::Init(void (*renderFunction)()) {
     spi->Init();
-    dma->Init(spi, userCmds);
+    dma->Init(spi, userCmds, core);
     core->Init(spi);
     userRender = renderFunction;
 }
