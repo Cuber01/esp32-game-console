@@ -51,21 +51,21 @@ DMAHandler::RectOverlap DMAHandler::GetRectChunkOverlap(uint16_t chunkStart, uin
     bool doesOverlap = false;
 
     // Starts inside of chunk
-    if (rectY > chunkStart && rectY < chunkEnd) {
-        overlap->start = rectY;
+    if (rectY >= chunkStart && rectY < chunkEnd) {
+        overlap.start = rectY;
         doesOverlap = true;
     // Starts above chunk and overlaps
     } else if (rectY < chunkStart && rectY + rectH > chunkStart) {
-        overlap->start = chunkStart;
+        overlap.start = chunkStart;
         doesOverlap = true;
     }
 
     if (doesOverlap) {
         if (rectY + rectH >= chunkEnd) {
-            overlap->end = chunkEnd;
+            overlap.end = chunkEnd;
         }
         else {
-            overlap->end = rectY + rectH;
+            overlap.end = rectY + rectH;
         }
     }
     return overlap;
