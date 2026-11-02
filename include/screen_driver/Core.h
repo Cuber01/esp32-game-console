@@ -1,11 +1,11 @@
 
 #ifndef GAME_CONSOLE_ST7789_CORE_H
 #define GAME_CONSOLE_ST7789_CORE_H
-#include <array>
 
 #include "Commands.h"
 #include "DisplaySettings.h"
 #include "DMAHandler.h"
+#include "esp_err.h"
 
 
 class Core {
@@ -36,7 +36,7 @@ public:
 
     esp_err_t SetRowsAddress(uint16_t y1, uint16_t y2);
 
-    esp_err_t SetColumnsAddress(uint8_t y1, uint8_t y2);
+    esp_err_t SetColumnsAddress(uint8_t x1, uint8_t x2);
 
     DisplayConfig ReadColorFormat();
 
