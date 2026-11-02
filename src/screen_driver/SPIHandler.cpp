@@ -63,6 +63,14 @@ esp_err_t SPIHandler::QueueTransmit(spi_transaction_t* trans) {
     return ret;
 }
 
+void SPIHandler::AcquireBus() {
+    spi_device_acquire_bus(spiHandle, portMAX_DELAY);
+}
+
+void SPIHandler::ReleaseBus() {
+    spi_device_release_bus(spiHandle);
+}
+
 esp_err_t SPIHandler::GetTransactionResult(spi_transaction_t** outTrans) {
     esp_err_t ret = ESP_OK;
     if (outTrans == nullptr) {

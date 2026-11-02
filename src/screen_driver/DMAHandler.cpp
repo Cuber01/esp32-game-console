@@ -100,6 +100,11 @@ void DMAHandler::RenderFrame() {
 
 
 void DMAHandler::StartLoop() {
+    spi->AcquireBus();
+
+    core->SetColumnsAddress(0, SCREEN_WIDTH - 1);
+    core->SetRowsAddress(0, SCREEN_HEIGHT - 1);
+
     spi->GpioWrite(SCREEN_DC, false);
     spi->GpioWrite(SCREEN_CS, false);
 
@@ -131,11 +136,19 @@ spi_transaction_t* DMAHandler::Loop(uint8_t nextChunkId) {
 }
 
 void DMAHandler::EndLoop(spi_transaction_t* readBuffers[BufferAmount]) const {
+    spi->ReleaseBus();
+
+    volatile esp_err_t err = ESP_OK;
     for (int i = 0; i < BufferAmount; i++) {
-        spi->GetTransactionResult(&(readBuffers[i]));
+        if (readBuffers == nullptr) {
+            err = spi->GetTransactionResult(nullptr);
+        } else {
+            err = spi->GetTransactionResult(&(readBuffers[i]));
+        }
+        ESP_ERROR_CHECK(err);
     }
 
-    spi->GpioWrite(SCREEN_CS, true);
+   // spi->GpioWrite(SCREEN_CS, true);
 }
 
 
