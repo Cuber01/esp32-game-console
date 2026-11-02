@@ -24,7 +24,7 @@ void SPIHandler::Init() {
         .sclk_io_num = SCREEN_SCL,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
-        .max_transfer_sz = 4096,
+        .max_transfer_sz = 20000,
     };
     // SPI2_HOST is available for user in ESP32. SPI1_HOST isn't
     err = spi_bus_initialize(SPI2_HOST, &busConfig, SPI_DMA_CH_AUTO);
