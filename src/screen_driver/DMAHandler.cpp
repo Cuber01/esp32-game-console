@@ -33,7 +33,7 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                 {
                     for (int y = overlap.start; y <= overlap.end; y++) {
                         int localY = y - chunkStartY;
-                        for (int x = 0; x < CHUNK_WIDTH; x++) {
+                        for (int x = header->x; x < header->x + header->w; x++) {
                             chunkBuf[localY * CHUNK_WIDTH + x] = __builtin_bswap16(header->color);
                         }
                     }
