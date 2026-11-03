@@ -107,8 +107,8 @@ void DMAHandler::RenderFrame() {
 void DMAHandler::StartLoop() {
     spi->AcquireBus();
 
-    core->SetColumnsAddress(0, SCREEN_WIDTH - 1);
-    core->SetRowsAddress(0, SCREEN_HEIGHT - 1);
+    // core->SetColumnsAddress(0, SCREEN_WIDTH - 1);
+    // core->SetRowsAddress(0, SCREEN_HEIGHT - 1);
 
     spi->GpioWrite(SCREEN_DC, false);
 
@@ -158,8 +158,6 @@ void DMAHandler::EndLoop(spi_transaction_t* readBuffers[BufferAmount]) const {
         }
         ESP_ERROR_CHECK(err);
     }
-
-   // spi->GpioWrite(SCREEN_CS, true);
 }
 
 

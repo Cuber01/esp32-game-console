@@ -23,11 +23,6 @@ void ST7789::FillScreen(uint16_t color) const {
 
 void ST7789::DrawRect(const uint16_t x, const uint16_t y, const uint16_t width, const uint16_t height, const uint16_t color) const {
     userCmds->PushFixedCommand<CmdRectHeader>(OpCode::RECT, CmdRectHeader {.x = x, .y = y, .w = width, .h = height, .color = color});
-    // for (int i = y; i < y+height; i++) {
-    //     for (int j = x; j < x+width; j++) {
-    //         currentFrameBuffer[j+i*width] = color;
-    //     }
-    // }
 }
 
 void ST7789::SetTextColor(uint16_t color) {
@@ -37,10 +32,6 @@ void ST7789::SetTextColor(uint16_t color) {
 void ST7789::SetTextBackgroundColor(uint16_t color) {
     textBackgroundColor = color;
 }
-
-// void ST7789::SetFrame(uint16_t* frameBuffer) {
-//     currentFrameBuffer = frameBuffer;
-// }
 
 // void ST7789::DrawText(uint16_t x, uint16_t y, const char* text) {
 //     uint16_t currentX = x;
