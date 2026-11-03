@@ -30,21 +30,27 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                 // Is overlap
                 if (overlap.end != 0) {
                     const char* txt = reinterpret_cast<const char*>(ptr);
-                    
+
                     for (int i = 0; i < header->textLen; i++) {
                         char* bitmap = Font[static_cast<int>(txt[i])];
 
-                        for (int y = overlap.start; y <= overlap.end; y++) {
+                        for (int y = overlap.start; y <= overlap.end-1; y++) {
                             int localY = y - chunkStartY;
-                            for (int localX = 0; localX < CHAR_W; localX++) {
-                                uint8_t set = (bitmap[localX] >> localY) & 1;
+                            for (int localX = 0; localX < CHAR_W + CHAR_SPACE; localX++) {
+                                uint8_t set = (bitmap[localY] >> localX) & 1;
+
+                                if (localX >= CHAR_W) {
+                                    set = 0; // Force draw empty space
+                                }
 
                                 chunkBuf[localY * CHUNK_WIDTH +
                                          header->x + localX +
-                                         i*CHAR_W + CHAR_SPACE] =
+                                         i*(CHAR_W + CHAR_SPACE)] =
                                          (set ? __builtin_bswap16(header->textColor)
                                               : __builtin_bswap16(header->backgroundColor));
                             }
+
+
                         }
                     }
 
@@ -62,7 +68,7 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                 if (overlap.end != 0) // Is overlap
                 {
                     for (int y = overlap.start; y <= overlap.end; y++) {
-                        int localY = y - chunkStartY;
+                        int localY = y - chunkStartY; // Y in-chunk
                         for (int x = header->x; x < header->x + header->w; x++) {
                             chunkBuf[localY * CHUNK_WIDTH + x] = __builtin_bswap16(header->color);
                         }
