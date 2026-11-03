@@ -237,19 +237,3 @@ esp_err_t Core::transmitParameters(const uint8_t* paramsBuffer, const size_t par
 
     return err;
 }
-
-// TODO for whatever reason this function clears out memory of paramsBuffer, but I only see it in debug, check if its a debugger bug
-// void ST7789Core::setupTxBuffer(spi_transaction_t* trans, const uint8_t* paramsBuffer, const size_t paramBytes) {
-//     // Use internal buffer for small parameter sets (<= 4 bytes) to avoid DMA alignment issues
-//     Serial.println(*paramsBuffer);
-//     if (paramBytes <= 4) {
-//         trans->flags = SPI_TRANS_USE_TXDATA;
-//         for (size_t i = 0; i < paramBytes; i++) {
-//             trans->tx_data[i] = paramsBuffer[i];
-//         }
-//     } else {
-//         trans->tx_buffer = paramsBuffer;
-//     }
-//     trans->length = paramBytes * 8;
-// }
-

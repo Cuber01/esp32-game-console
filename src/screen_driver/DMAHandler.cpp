@@ -6,6 +6,7 @@
 
 #include "screen_driver/Commands.h"
 #include "screen_driver/Core.h"
+#include "screen_driver/Font.h"
 
 void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandBuffer& cmdBuffer) {
     memset(chunkBuf, 0, CHUNK_WIDTH * CHUNK_HEIGHT * sizeof(uint16_t));
@@ -21,7 +22,36 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
 
         switch (op) {
             case OpCode::TEXT: {
-                break;
+                auto header = reinterpret_cast<const CmdTextHeader*>(ptr);
+                ptr += sizeof(CmdTextHeader);
+
+                RectOverlap overlap = GetRectChunkOverlap(chunkStartY, chunkEndY, header->y, CHAR_H);
+
+                // Is overlap
+                if (overlap.end != 0) {
+                    const char* txt = reinterpret_cast<const char*>(ptr);
+                    
+                    for (int i = 0; i < header->textLen; i++) {
+                        char* bitmap = Font[static_cast<int>(txt[i])];
+
+                        for (int y = overlap.start; y <= overlap.end; y++) {
+                            int localY = y - chunkStartY;
+                            for (int localX = 0; localX < CHAR_W; localX++) {
+                                uint8_t set = (bitmap[localX] >> localY) & 1;
+
+                                chunkBuf[localY * CHUNK_WIDTH +
+                                         header->x + localX +
+                                         i*CHAR_W + CHAR_SPACE] =
+                                         (set ? __builtin_bswap16(header->textColor)
+                                              : __builtin_bswap16(header->backgroundColor));
+                            }
+                        }
+                    }
+
+                    ptr += header->textLen;
+                }
+
+
             }
 
             case OpCode::RECT: {
@@ -29,7 +59,7 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                 ptr += sizeof(CmdRectHeader);
 
                 RectOverlap overlap = GetRectChunkOverlap(chunkStartY, chunkEndY, header->y, header->h);
-                if (overlap.end != 0) // Is valid
+                if (overlap.end != 0) // Is overlap
                 {
                     for (int y = overlap.start; y <= overlap.end; y++) {
                         int localY = y - chunkStartY;
@@ -38,7 +68,6 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                         }
                     }
                 }
-
             }
             default:
                 break;

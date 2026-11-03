@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <cstring>
 
+#include "Colors.h"
+
 enum class OpCode : uint8_t {
     RECT,
     TEXT
@@ -21,7 +23,8 @@ struct CmdRectHeader {
 
 struct CmdTextHeader {
     uint16_t x, y;
-    uint16_t color;
+    uint16_t textColor;
+    uint16_t backgroundColor;
     uint16_t textLen; // Length of character data immediately following this struct
 };
 
@@ -33,46 +36,41 @@ private:
     uint8_t buffer[BUFFER_CAPACITY] = {};
     size_t writeOffset = 0;
 
+
 public:
+    uint16_t TextColor = WHITE;
+    uint16_t TextBackgroundColor = BLACK;
+
     void Clear() { writeOffset = 0; }
     const uint8_t* GetRawData() const { return buffer; }
     size_t GetSize() const { return writeOffset; }
 
-    bool WriteRaw(const void* data, size_t size) {
-        if (writeOffset + size > BUFFER_CAPACITY) return false;
+    void WriteRaw(const void* data, size_t size) {
+        assert(writeOffset + size <= BUFFER_CAPACITY);
 
         std::memcpy(&buffer[writeOffset], data, size);
         writeOffset += size;
-        return true;
     }
 
     template <typename T>
-    bool PushFixedCommand(OpCode op, const T& params) {
-        if (writeOffset + sizeof(OpCode) + sizeof(T) > BUFFER_CAPACITY) return false;
+    void PushFixedCommand(OpCode op, const T& params) {
+        assert(writeOffset + sizeof(OpCode) + sizeof(T) <= BUFFER_CAPACITY);
 
         buffer[writeOffset] = static_cast<uint8_t>(op);
         writeOffset++;
 
         std::memcpy(&buffer[writeOffset], &params, sizeof(T));
         writeOffset += sizeof(T);
-        return true;
     }
 
-    bool DrawText(uint16_t x, uint16_t y, const char* text, uint16_t textLen, uint16_t color) {
+    void PushTextCommand(uint16_t x, uint16_t y, const char* text, uint16_t textLen) {
         OpCode op = OpCode::TEXT;
-        CmdTextHeader header = { x, y, color, textLen };
-
-        size_t totalSize = sizeof(OpCode) + sizeof(CmdTextHeader) + textLen;
-        if (writeOffset + totalSize > BUFFER_CAPACITY) return false;
+        CmdTextHeader header = { x, y, TextColor, TextBackgroundColor, textLen };
+        assert(writeOffset + sizeof(OpCode) + sizeof(CmdTextHeader) + textLen <= BUFFER_CAPACITY);
 
         buffer[writeOffset++] = static_cast<uint8_t>(op);
         WriteRaw(&header, sizeof(CmdTextHeader));
-        WriteRaw(text, textLen); // Stream raw bytes without needing a null terminator
-        return true;
-    }
-
-    bool DrawText(uint16_t x, uint16_t y, const char* text, uint16_t color) {
-        return DrawText(x, y, text, static_cast<uint16_t>(strlen(text)), color);
+        WriteRaw(text, textLen);
     }
 
 };

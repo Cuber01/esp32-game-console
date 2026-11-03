@@ -9,7 +9,7 @@
 ST7789 gfx = ST7789();
 void renderFrame() {
     gfx.FillScreen(BLUE);
-    gfx.DrawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, RED);
+    gfx.DrawText( 10, 10, "A");
 }
 
 void setup() {

@@ -15,8 +15,6 @@ private:
     CommandBuffer* userCmds = new CommandBuffer();
 
     uint16_t* currentFrameBuffer = nullptr;
-    uint16_t textColor = WHITE;
-    uint16_t textBackgroundColor = BLACK;
     void (*userRender)() = nullptr;
 
 public:

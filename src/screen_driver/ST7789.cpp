@@ -26,23 +26,13 @@ void ST7789::DrawRect(const uint16_t x, const uint16_t y, const uint16_t width, 
 }
 
 void ST7789::SetTextColor(uint16_t color) {
-    textColor = color;
+    userCmds->TextColor = color;
 }
 
 void ST7789::SetTextBackgroundColor(uint16_t color) {
-    textBackgroundColor = color;
+    userCmds->TextBackgroundColor = color;
 }
 
-// void ST7789::DrawText(uint16_t x, uint16_t y, const char* text) {
-//     uint16_t currentX = x;
-//     driver->SetColumnsAddress(x, (CHAR_WIDTH+CHAR_SPACING)*strlen(text));
-//     driver->SetRowsAddress(y, CHAR_HEIGHT);
-//
-//     driver->WritePixelData(textBackgroundColor, 1, false);
-//     for (int i = 0; text[i] != '\0'; i++) {
-//         uint8_t index = GET_CHAR_INDEX(text[i]);
-//         for (int j = 0;)
-//
-//         currentX += CHAR_WIDTH + CHAR_SPACING;
-//     }
-// }
+void ST7789::DrawText(uint16_t x, uint16_t y, const char* text) {
+    userCmds->PushTextCommand(x, y, text, static_cast<uint16_t>(strlen(text)));
+}
