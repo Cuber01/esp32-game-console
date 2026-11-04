@@ -34,10 +34,10 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                     for (int i = 0; i < header->textLen; i++) {
                         char* bitmap = Font[static_cast<int>(txt[i])];
 
-                        for (int y = overlap.start; y <= overlap.end-1; y++) {
+                        for (int y = overlap.start; y < overlap.end; y++) {
                             int localY = y - chunkStartY;
                             for (int localX = 0; localX < CHAR_W + CHAR_SPACE; localX++) {
-                                uint8_t set = (bitmap[localY] >> localX) & 1;
+                                uint8_t set = (bitmap[localY - header->y] >> localX) & 1;
 
                                 if (localX >= CHAR_W) {
                                     set = 0; // Force draw empty space
