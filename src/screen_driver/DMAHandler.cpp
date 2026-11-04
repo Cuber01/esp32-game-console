@@ -30,14 +30,16 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                 // Is overlap
                 if (overlap.end != 0) {
                     const char* txt = reinterpret_cast<const char*>(ptr);
+                    uint8_t linesDrawn = header->linesDrawn;
 
                     for (int i = 0; i < header->textLen; i++) {
                         char* bitmap = Font[static_cast<int>(txt[i])];
-
+                        linesDrawn = header->linesDrawn;
                         for (int y = overlap.start; y < overlap.end; y++) {
-                            int localY = y - chunkStartY;
+
+                            int localY = y - chunkStartY; // localY is problem
                             for (int localX = 0; localX < CHAR_W + CHAR_SPACE; localX++) {
-                                uint8_t set = (bitmap[localY - header->y] >> localX) & 1;
+                                uint8_t set = (bitmap[linesDrawn] >> localX) & 1;
 
                                 if (localX >= CHAR_W) {
                                     set = 0; // Force draw empty space
@@ -49,12 +51,12 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                                          (set ? __builtin_bswap16(header->textColor)
                                               : __builtin_bswap16(header->backgroundColor));
                             }
-
-
+                            linesDrawn++;
                         }
                     }
+                    header->linesDrawn = linesDrawn;
 
-                    ptr += header->textLen;
+                    ptr += header->textLen; // POTENTIAL ERROR
                 }
 
 

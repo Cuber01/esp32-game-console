@@ -26,6 +26,8 @@ struct CmdTextHeader {
     uint16_t textColor;
     uint16_t backgroundColor;
     uint16_t textLen; // Length of character data immediately following this struct
+
+    mutable uint8_t linesDrawn; // Used for keeping state on how many lines of the text were already drawn this frame
 };
 
 #pragma pack(pop)
@@ -65,7 +67,7 @@ public:
 
     void PushTextCommand(uint16_t x, uint16_t y, const char* text, uint16_t textLen) {
         OpCode op = OpCode::TEXT;
-        CmdTextHeader header = { x, y, TextColor, TextBackgroundColor, textLen };
+        CmdTextHeader header = { x, y, TextColor, TextBackgroundColor, textLen, 0 };
         assert(writeOffset + sizeof(OpCode) + sizeof(CmdTextHeader) + textLen <= BUFFER_CAPACITY);
 
         buffer[writeOffset++] = static_cast<uint8_t>(op);
