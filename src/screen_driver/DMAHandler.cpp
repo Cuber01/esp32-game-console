@@ -55,11 +55,9 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                         }
                     }
                     header->linesDrawn = linesDrawn;
-
-                    ptr += header->textLen; // POTENTIAL ERROR
                 }
-
-
+                ptr += header->textLen;
+                break;
             }
 
             case OpCode::RECT: {
@@ -76,6 +74,7 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                         }
                     }
                 }
+                break;
             }
             default:
                 break;
