@@ -67,7 +67,7 @@ void DMAHandler::RasterizeChunk(uint16_t* chunkBuf, int chunkIdx, const CommandB
                 RectOverlap overlap = GetRectChunkOverlap(chunkStartY, chunkEndY, header->y, header->h);
                 if (overlap.end != 0) // Is overlap
                 {
-                    for (int y = overlap.start; y <= overlap.end; y++) {
+                    for (int y = overlap.start; y < overlap.end; y++) {
                         int localY = y - chunkStartY; // Y in-chunk
                         for (int x = header->x; x < header->x + header->w; x++) {
                             chunkBuf[localY * CHUNK_WIDTH + x] = __builtin_bswap16(header->color);
@@ -97,7 +97,7 @@ DMAHandler::RectOverlap DMAHandler::GetRectChunkOverlap(uint16_t chunkStart, uin
 
     if (doesOverlap) {
         if (rectY + rectH >= chunkEnd) {
-            overlap.end = chunkEnd;
+            overlap.end = chunkEnd + 1;
         }
         else {
             overlap.end = rectY + rectH;
