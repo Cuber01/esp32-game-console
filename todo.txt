@@ -5,7 +5,7 @@ X fix crash after a few minutes: memory corruption / stack overflow suspected: c
 X fix issue where apple does not reappear
 - fix apples spawning on snake
 - do rendering on antoher thread or find other way to take input without it getting delayed by delay()
-- write driver
+X write driver
 - remove arduino dependencies
 - add sound
 - order better buttons

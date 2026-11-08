@@ -35,7 +35,9 @@ void setup() {
 }
 
 void loop() {
-    gameLoop();
-    gfx.Update();
+    if (IsRunning()) {
+        gameLoop();
+        gfx.Update();
+    }
 }
 
