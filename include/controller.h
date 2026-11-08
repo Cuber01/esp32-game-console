@@ -11,7 +11,8 @@ typedef enum
     INPUT_PRESS=27
 } InputKeys;
 
-void controllerInit();
-InputKeys controllerGetInput();
+void ControllerInit();
+InputKeys ControllerGetLastKeyPressed();
+
 
 #endif // GAME_CONSOLE_CONTROLLER_H

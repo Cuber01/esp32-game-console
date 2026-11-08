@@ -37,13 +37,13 @@ void update(InputKeys input)
 void gameLoop()
 {
     mapClear();
-    update(controllerGetInput());
+    update(ControllerGetLastKeyPressed());
     draw();
 }
 
 void gameInit()
 {
-    controllerInit();
+    ControllerInit();
     snakeInit();
     createApple(calculateApplePos());
 }
