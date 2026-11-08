@@ -1,8 +1,8 @@
 #ifndef GAME_CONSOLE_MAP_H
 #define GAME_CONSOLE_MAP_H
 
-#include "graphics.h"
 #include "game.h"
+#include "graphics.h"
 #include <cstdint>
 
 #define GROUND_SYMBOL ' '

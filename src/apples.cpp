@@ -3,6 +3,7 @@
 #include "game.h"
 #include "map.h"
 #include "apples.h"
+#include "graphics.h"
 
 Point CurrentApple = (Point){.x = -1, .y = -1};
 int ApplesEaten = 0;

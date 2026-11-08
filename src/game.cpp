@@ -19,7 +19,6 @@ void draw()
 {
    placeSnakeOnMap();
    mapSet(CurrentApple.x, CurrentApple.y, APPLE_SYMBOL);
-   gameDraw();
 }
 
 
