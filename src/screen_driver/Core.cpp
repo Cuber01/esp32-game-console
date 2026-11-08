@@ -1,8 +1,6 @@
 #include "cstdint"
 #include "screen_driver/Core.h"
 
-#include <HardwareSerial.h>
-
 #include "graphics.h"
 #include "driver/spi_master.h"
 #include "screen_driver/Commands.h"
@@ -16,9 +14,9 @@ void Core::Init(SPIHandler* spiHandler)
 
     // Wake up software
     ESP_ERROR_CHECK(transmitCommand(SWRESET));
-    delay(120);
+    vTaskDelay(120 / portTICK_PERIOD_MS);
     ESP_ERROR_CHECK(SetSleep(false));
-    delay(120);
+    vTaskDelay(120 / portTICK_PERIOD_MS);
 
     // Setup screen settings
     DisplayConfig newFormats {};
@@ -41,7 +39,7 @@ void Core::Init(SPIHandler* spiHandler)
     newMadctl.bits.mh = false;
     newMadctl.bits.rgb = false;
     SetMadctl(&newMadctl);
-    delay(200);
+    vTaskDelay(200 / portTICK_PERIOD_MS);
 
 #ifdef DEBUG
     volatile MadctlConfig madctl = ReadMadctl();
@@ -53,7 +51,7 @@ void Core::Init(SPIHandler* spiHandler)
 
     // Turn on
     ESP_ERROR_CHECK(TurnDisplay(true));
-    delay(200);
+    vTaskDelay(200 / portTICK_PERIOD_MS);
 }
 
 uint32_t Core::ReadDisplayID()

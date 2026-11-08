@@ -1,8 +1,6 @@
 #include "game.h"
 #include "snake.h"
 
-#include <HardwareSerial.h>
-
 #include "fixed_circular_queue.h"
 #include "map.h"
 #include "controller.h"
@@ -13,7 +11,7 @@ bool snakeCollision(Point& nextPos);
 
 void placeSnakeOnMap()
 {
-    for (size_t i = 1; i < SnakeParts.Size(); i++) {
+    for (std::size_t i = 1; i < SnakeParts.Size(); i++) {
         const Point& point = SnakeParts[i];
         if (!IsInBounds(point.x, point.y)) {
             EndGame();
@@ -93,7 +91,7 @@ void snakeMove(InputKeys direction, bool grow)
 
 bool snakeCollision(Point& nextPos)
 {
-    for (size_t i = 1; i < SnakeParts.Size(); i++) {
+    for (std::size_t i = 1; i < SnakeParts.Size(); i++) {
         Point& part = SnakeParts[i];
         if (&part != &SnakeParts.GetHead() && nextPos.x == part.x && nextPos.y == part.y) {
             return true;

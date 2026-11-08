@@ -1,6 +1,9 @@
 #ifndef GAME_CONSOLE_FIXED_CIRCULAR_QUEUE_H
 #define GAME_CONSOLE_FIXED_CIRCULAR_QUEUE_H
+
 #include <array>
+#include <cstddef>
+#include <cassert>
 
 template <typename T, std::size_t N>
 class FixedCircularQueue {

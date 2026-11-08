@@ -1,7 +1,5 @@
 #include "screen_driver/ST7789.h"
 
-#include <esp32-hal.h>
-
 #include "graphics.h"
 
 void ST7789::Init(void (*renderFunction)()) {

@@ -1,15 +1,15 @@
 #include "game.h"
 
-#include <esp32-hal.h>
+#include <FreeRTOSConfig.h>
+#include <portmacro.h>
 
 #include "controller.h"
 #include "apples.h"
 #include "snake.h"
 #include "map.h"
-#include "fixed_list.h"
 
 bool gameRunning = true;
-int frameDelay = 100;
+
 
 void handleInput(char input, bool grow);
 
@@ -42,7 +42,6 @@ void gameLoop()
     mapClear();
     update(controllerGetInput());
     draw();
-    delay(frameDelay);
 }
 
 void gameInit()

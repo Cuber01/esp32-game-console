@@ -1,17 +1,21 @@
-#include <Arduino.h>
-
 #include "apples.h"
 #include "game.h"
 #include "map.h"
 #include "screen_driver/Colors.h"
 #include "screen_driver/ST7789.h"
-#include "screen_driver/Core.h"
+#include <stdio.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_system.h"
 
+int frameDelay = 100;
 
 ST7789 gfx = ST7789();
 void renderFrame() {
     gfx.DrawText(0, 0, "APPLES: ");
-    gfx.DrawText(72, 0, String(ApplesEaten).c_str());
+    char applesBuffer[8];
+    sprintf(applesBuffer, "%d", ApplesEaten);
+    gfx.DrawText(72, 0,  applesBuffer);
 
     gfx.DrawRect(0, MAP_BLOCK_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT-MAP_BLOCK_SIZE, WHITE);
     for (int y = 1; y < MAP_HEIGHT; y++)
@@ -27,17 +31,26 @@ void renderFrame() {
     }
 }
 
-void setup() {
-    Serial.begin(9600);
-    Serial.print(F("Hello! ST77xx TFT Test"));
+void mainInit() {
+    printf("Hello! ST77xx TFT Test");
     gfx.Init(renderFrame);
     gameInit();
 }
 
-void loop() {
+void mainLoop() {
     if (IsRunning()) {
         gameLoop();
         gfx.Update();
+        vTaskDelay(pdMS_TO_TICKS(frameDelay));
     }
 }
+
+extern "C" void app_main(void) {
+    mainInit();
+
+    while (true) {
+        mainLoop();
+    }
+}
+
 
