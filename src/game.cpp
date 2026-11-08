@@ -10,10 +10,7 @@
 
 bool gameRunning = true;
 
-
 void handleInput(char input, bool grow);
-
-unsigned int time_counter=0;
 
 void draw()
 {
